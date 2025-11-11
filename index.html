@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Botronixs</title>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" id="nav-home"><i class="fa-solid fa-bolt"></i> Botronixs</div>
+
+      <div class="search-wrap">
+        <input id="nav-search" placeholder="Search Arduino, sensors, modules..." aria-label="Search">
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-btn" id="btn-theme" title="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+        <button class="icon-btn" id="nav-wishlist" title="Wishlist"><i class="fa-regular fa-heart"></i><span class="badge" id="wish-count">0</span></button>
+        <button class="icon-btn" id="nav-orders" title="Orders"><i class="fa-solid fa-box"></i></button>
+        <button class="icon-btn" id="nav-profile" title="Profile"><i class="fa-regular fa-user"></i></button>
+        <button class="icon-btn" id="nav-cart" title="Cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge" id="cart-count">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- APP -->
+  <main id="app" class="app-container">
+    <!-- HOME -->
+    <section id="view-home" class="view">
+      <div class="hero card-hero">
+        <div class="hero-text">
+          <h1>Botronixs — Maker & Pro Electronics</h1>
+          <p>Boards, modules, sensors, kits — for students, hobbyists and pros.</p>
+          <div class="hero-cta">
+            <button class="btn btn-primary" id="home-shop">Shop Now</button>
+            <button class="btn btn-ghost" id="home-products">Browse Products</button>
+          </div>
+        </div>
+        <div class="hero-image"><img src="C:\Users\HP\OneDrive\Desktop\ECOM\main.jpg" alt="Electronics hero"></div>
+      </div>
+
+      <section class="section">
+        <h2>Deals of the Day</h2>
+        <div id="deals-grid" class="grid"></div>
+      </section>
+
+      <section class="section">
+        <h2>Featured</h2>
+        <div id="featured-grid" class="grid"></div>
+      </section>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="view-products" class="view hidden">
+      <div class="products-shell">
+        <aside class="filters card">
+          <h3>Filters</h3>
+          <label>Category
+            <select id="filter-category"><option value="">All</option></select>
+          </label>
+          <label>Price
+            <select id="filter-price">
+              <option value="">All</option>
+              <option value="0-199">₹0 - ₹199</option>
+              <option value="200-499">₹200 - ₹499</option>
+              <option value="500-1499">₹500 - ₹1499</option>
+              <option value="1500+">₹1500+</option>
+            </select>
+          </label>
+          <label>Sort
+            <select id="sort-by">
+              <option value="relevance">Relevance</option>
+              <option value="price-asc">Price ↑</option>
+              <option value="price-desc">Price ↓</option>
+              <option value="rating-desc">Rating</option>
+            </select>
+          </label>
+          <div class="filter-actions">
+            <button id="apply-filters" class="btn">Apply</button>
+            <button id="reset-filters" class="btn btn-ghost">Reset</button>
+          </div>
+
+          <hr>
+          <h4>Admin</h4>
+          <button id="open-admin" class="btn btn-outline">Admin Panel</button>
+          <button id="open-staff" class="btn btn-outline">Staff Panel</button>
+        </aside>
+
+        <section class="product-area">
+          <div class="toolbar">
+            <input id="page-search" placeholder="Search in results..." />
+            <div id="pagination" class="pagination"></div>
+          </div>
+
+          <div id="products-grid" class="grid"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- PRODUCT DETAIL -->
+    <section id="view-product-detail" class="view hidden">
+      <button class="btn btn-ghost" id="pd-back">&larr; Back</button>
+      <div class="detail-shell">
+        <div class="gallery card" id="pd-gallery"></div>
+        <div class="info card" id="pd-info"></div>
+      </div>
+      <section id="pd-reviews" class="section"></section>
+      <section class="section">
+        <h3>Related</h3>
+        <div id="pd-related" class="grid"></div>
+      </section>
+    </section>
+
+    <!-- CART -->
+    <section id="view-cart" class="view hidden">
+      <h2>Your Cart</h2>
+      <div id="cart-list" class="card-list"></div>
+      <div class="cart-actions card">
+        <div>Subtotal: <strong id="cart-subtotal">₹0.00</strong></div>
+        <div class="cart-cta">
+          <button id="btn-checkout" class="btn btn-primary">Checkout</button>
+          <button id="btn-clear-cart" class="btn btn-ghost">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- WISHLIST -->
+    <section id="view-wishlist" class="view hidden">
+      <h2>Wishlist</h2>
+      <div id="wishlist-grid" class="grid"></div>
+    </section>
+
+    <!-- ORDERS -->
+    <section id="view-orders" class="view hidden">
+      <h2>Orders</h2>
+      <div id="orders-list"></div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="view-profile" class="view hidden">
+      <h2>Profile</h2>
+      <form id="profile-form" class="card profile-card">
+        <label>Name<input id="profile-name"/></label>
+        <label>Email<input id="profile-email" type="email"/></label>
+        <label>Address<textarea id="profile-address"></textarea></label>
+        <div class="profile-actions">
+          <button id="save-profile" class="btn btn-primary">Save</button>
+          <button id="logout-btn" class="btn btn-ghost">Logout</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="view-admin" class="view hidden">
+      <h2>Admin Dashboard</h2>
+      <div class="admin-grid">
+        <div class="card">
+          <h3>Add / Edit Product</h3>
+          <form id="admin-add-form" class="admin-form">
+            <input name="id" type="hidden" />
+            <input name="sku" placeholder="SKU (e.g., ARD-UNO)" />
+            <input name="name" placeholder="Product name" required />
+            <input name="category" placeholder="Category" />
+            <input name="price" placeholder="Price" type="number" required />
+            <input name="stock" placeholder="Stock qty" type="number" />
+            <input name="image" placeholder="Image URL" />
+            <textarea name="desc" placeholder="Short description"></textarea>
+            <textarea name="specs" placeholder='Specs JSON (e.g. {"voltage":"5V"})'></textarea>
+            <div class="admin-actions">
+              <button class="btn btn-primary">Save Product</button>
+              <button id="admin-reset" type="button" class="btn btn-ghost">Reset</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Products</h3>
+          <div id="admin-products-list" class="admin-products-list"></div>
+        </div>
+
+        <div class="card">
+          <h3>Data</h3>
+          <button id="export-json" class="btn">Export JSON</button>
+          <input id="import-json" type="file" accept=".json" />
+        </div>
+      </div>
+    </section>
+
+    <!-- STAFF -->
+    <section id="view-staff" class="view hidden">
+      <h2>Staff Orders</h2>
+      <div id="staff-orders"></div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>© 2025 Botronixs </div>
+    <div>Arduino • Sensors • Modules • Tools</div>
+  </footer>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-inner card">
+      <button class="modal-close" id="modal-close" aria-label="Close modal">&times;</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- product card template -->
+  <template id="tpl-product-card">
+    <article class="card product-card">
+      <img class="pimg" src="" alt="">
+      <h3 class="pname"></h3>
+      <div class="meta pcate"></div>
+      <div class="price pprice"></div>
+      <div class="card-actions">
+        <button class="btn btn-outline btn-view">View</button>
+        <button class="btn btn-ghost btn-wish"><i class="fa-regular fa-heart"></i></button>
+        <button class="btn btn-primary btn-add">Add</button>
+      </div>
+    </article>
+  </template>
+
+  <!-- App script -->
+  <script src="app.js" defer></script>
+</body>
+</html>
