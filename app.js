@@ -42,7 +42,7 @@ const SEED = [
     category: 'Computing Boards',
     price: 5500,
     stock: 30,
-    image: 'https://images.unsplash.com/photo-1581092334607-c31d05e1e3cc?w=800&auto=format&fit=crop',
+    image: './images2.jpeg',
     description: 'Popular single-board computer (Pi 4 Model B).',
     rating: 4.8
   },

@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Botronixs — Maker & Pro Electronics</title>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+  /* ---------- Variables & Base ---------- */
+  :root{
+    --bg:#f6fbff;
+    --surface:#ffffff;
+    --muted:#6b7a86;
+    --primary-1:#0b6cff;
+    --primary-2:#0556d8;
+    --accent:#ff7a59;
+    --glass: rgba(255,255,255,0.75);
+    --radius:14px;
+    --card-shadow: 0 10px 30px rgba(5,86,216,0.06);
+    --glass-border: 1px solid rgba(255,255,255,0.6);
+  }
+  :root[data-theme="dark"]{
+    --bg:linear-gradient(180deg,#031225,#04162b);
+    --surface:#071226;
+    --muted:#9fb3d5;
+    --primary-1:#80aefe;
+    --primary-2:#3f7de8;
+    --accent:#ffb38a;
+    --glass: rgba(255,255,255,0.02);
+    --card-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color: #082034}
+  body{padding-bottom:64px}
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    position:sticky;top:12px;z-index:120;backdrop-filter: blur(6px);
+    margin:0 auto;max-width:1200px;padding:10px;border-radius:14px;display:flex;align-items:center;gap:12px;
+    background: linear-gradient(90deg,var(--primary-1),var(--primary-2));
+    color:white; box-shadow: 0 12px 30px rgba(5,86,216,0.12);
+  }
+  .brand{font-weight:800;display:flex;gap:10px;align-items:center;cursor:pointer;font-size:1.15rem}
+  .brand i{background:rgba(255,255,255,0.15);padding:8px;border-radius:10px}
+  .search-wrap{flex:1;display:flex;justify-content:center}
+  .search-wrap input{width:100%;max-width:760px;padding:10px 14px;border-radius:28px;border:none;background:var(--glass);color:var(--surface);outline:none;box-shadow:var(--card-shadow)}
+  .top-actions{display:flex;gap:8px;align-items:center}
+  .icon-btn{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:8px 10px;border-radius:10px;cursor:pointer;position:relative;font-size:0.95rem}
+  .icon-btn .badge{position:absolute;top:-6px;right:-6px;background:#ff5a5f;color:#fff;padding:2px 6px;border-radius:999px;font-size:0.72rem}
+
+  /* ---------- Layout ---------- */
+  .container{max-width:1200px;margin:22px auto;padding:0 16px}
+  .hero{display:flex;gap:22px;align-items:center;padding:22px;border-radius:16px;background:linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,250,255,0.6));box-shadow:var(--card-shadow)}
+  .hero .hero-left{flex:1}
+  .hero h1{font-size:1.8rem;color:var(--primary-2);margin-bottom:8px}
+  .hero p{color:var(--muted);margin-bottom:12px}
+  .hero-cta{display:flex;gap:10px}
+  .btn{padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:700}
+  .btn-primary{background:linear-gradient(90deg,var(--primary-1),var(--primary-2));color:#fff;box-shadow:0 12px 26px rgba(11,108,255,0.12)}
+  .btn-ghost{background:transparent;border:1px solid rgba(6,20,40,0.06);color:var(--primary-2)}
+
+  .hero-image img{width:420px;height:260px;object-fit:cover;border-radius:12px;box-shadow:var(--card-shadow)}
+
+  /* ---------- Sections & grids ---------- */
+  .section{margin-top:20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+  .card{background:var(--surface);border-radius:12px;padding:12px;box-shadow:var(--card-shadow);color:inherit}
+
+  .product-card{display:flex;flex-direction:column;gap:10px;min-height:340px;overflow:hidden}
+  .product-card img{width:100%;height:160px;object-fit:cover;border-radius:10px}
+  .pname{font-weight:800}
+  .meta{color:var(--muted);font-size:0.88rem}
+  .price{font-weight:900;color:var(--accent);font-size:1.05rem;margin-top:auto}
+  .card-actions{display:flex;gap:8px;align-items:center}
+
+  /* ---------- Side / Products page ---------- */
+  .products-shell{display:grid;grid-template-columns:260px 1fr;gap:16px;margin-top:10px}
+  .filters label{display:block;margin-top:12px}
+  .filters select,.filters input{width:100%;padding:10px;border-radius:8px;margin-top:6px;border:1px solid #eef6ff;background:transparent}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .toolbar input{padding:8px 12px;border-radius:8px;border:1px solid #eef6ff;min-width:240px}
+
+  /* ---------- Detail ---------- */
+  .detail-shell{display:flex;gap:16px;margin-top:12px}
+  .gallery img{width:100%;height:420px;object-fit:cover;border-radius:10px}
+  .info h2{margin-bottom:8px}
+  .info .price{font-size:1.4rem}
+
+  /* ---------- Cart & lists ---------- */
+  .card-list{display:flex;flex-direction:column;gap:10px}
+  .cart-row{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.05)}
+  .cart-row img{width:96px;height:64px;object-fit:cover;border-radius:8px}
+
+  /* ---------- Admin / staff ---------- */
+  .admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .admin-products-list{max-height:420px;overflow:auto;padding:6px}
+  .admin-actions{display:flex;gap:8px;margin-top:8px}
+
+  /* ---------- Modal ---------- */
+  .modal{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:flex;align-items:center;justify-content:center;z-index:300}
+  .modal.hidden{display:none}
+  .modal-inner{width:92%;max-width:820px;position:relative;padding:20px;border-radius:14px;background:var(--surface);box-shadow:var(--card-shadow)}
+  .modal-close{position:absolute;right:12px;top:8px;background:#fff;border-radius:999px;width:36px;height:36px;border:none;cursor:pointer}
+
+  /* ---------- Footer ---------- */
+  .footer{max-width:1200px;margin:28px auto;padding:12px 16px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+
+  /* ---------- Small screens ---------- */
+  @media(max-width:980px){
+    .products-shell{grid-template-columns:1fr}
+    .hero{flex-direction:column}
+    .hero-image img{width:100%;height:220px}
+    .admin-grid{grid-template-columns:1fr}
+    .topbar{padding:10px}
+  }
+
+  /* ---------- Tiny helpers ---------- */
+  .hidden{display:none!important}
+  .muted{color:var(--muted)}
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,0.04);font-weight:700}
+  .toolbar .pagination{display:flex;gap:6px}
+  .pagination button{padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
+  .badge{background:#ff5a5f;color:#fff;padding:4px 8px;border-radius:999px;font-weight:800}
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar" role="banner">
+    <div style="display:flex;align-items:center;gap:12px;flex:1">
+      <div class="brand" id="nav-home"><i class="fa-solid fa-bolt"></i> Botronixs</div>
+      <div class="search-wrap">
+        <input id="nav-search" placeholder="Search Arduino, sensors, modules..." aria-label="Search">
+      </div>
+    </div>
+
+    <div class="top-actions" role="navigation" aria-label="top actions">
+      <button class="icon-btn" id="btn-theme" title="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+      <button class="icon-btn" id="nav-wishlist" title="Wishlist"><i class="fa-regular fa-heart"></i><span class="badge" id="wish-count">0</span></button>
+      <button class="icon-btn" id="nav-orders" title="Orders"><i class="fa-solid fa-box"></i></button>
+      <button class="icon-btn" id="nav-profile" title="Profile"><i class="fa-regular fa-user"></i></button>
+      <button class="icon-btn" id="nav-cart" title="Cart"><i class="fa-solid fa-cart-shopping"></i><span class="badge" id="cart-count">0</span></button>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <!-- HOME -->
+    <section id="view-home" class="view">
+      <div class="hero card">
+        <div class="hero-left">
+          <h1>Botronixs — Maker & Pro Electronics</h1>
+          <p>Boards, modules, sensors and kits for students, hobbyists and pros. Discover new kits and lightning deals every day.</p>
+          <div class="hero-cta">
+            <button class="btn btn-primary" id="home-shop">Shop Now</button>
+            <button class="btn btn-ghost" id="home-products">Browse Products</button>
+          </div>
+          <div style="margin-top:12px;color:var(--muted)">Tip: click the profile icon to login as admin or staff to access their dashboards.</div>
+        </div>
+        <div class="hero-image">
+          <img src="https://images.unsplash.com/photo-1581093588401-22b063c2a2f0?w=1400&q=80&auto=format&fit=crop" alt="Electronics hero">
+        </div>
+      </div>
+
+      <section class="section">
+        <h2>Deals of the Day</h2>
+        <div id="deals-grid" class="grid"></div>
+      </section>
+
+      <section class="section">
+        <h2>Featured</h2>
+        <div id="featured-grid" class="grid"></div>
+      </section>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="view-products" class="view hidden">
+      <div class="products-shell">
+        <aside class="filters card">
+          <h3>Filters</h3>
+          <label>Category
+            <select id="filter-category"><option value="">All</option></select>
+          </label>
+          <label>Price
+            <select id="filter-price">
+              <option value="">All</option>
+              <option value="0-199">₹0 - ₹199</option>
+              <option value="200-499">₹200 - ₹499</option>
+              <option value="500-1499">₹500 - ₹1499</option>
+              <option value="1500+">₹1500+</option>
+            </select>
+          </label>
+          <label>Sort
+            <select id="sort-by">
+              <option value="relevance">Relevance</option>
+              <option value="price-asc">Price ↑</option>
+              <option value="price-desc">Price ↓</option>
+              <option value="rating-desc">Rating</option>
+            </select>
+          </label>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button id="apply-filters" class="btn btn-primary">Apply</button>
+            <button id="reset-filters" class="btn btn-ghost">Reset</button>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid rgba(0,0,0,0.06)">
+
+          <div id="admin-links" class="hidden">
+            <h4>Admin</h4>
+            <button id="open-admin" class="btn btn-ghost">Admin Panel</button>
+            <button id="open-staff" class="btn btn-ghost">Staff Panel</button>
+          </div>
+        </aside>
+
+        <section class="product-area">
+          <div class="toolbar">
+            <input id="page-search" placeholder="Search in results..." />
+            <div id="pagination" class="pagination"></div>
+          </div>
+
+          <div id="products-grid" class="grid"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- PRODUCT DETAIL -->
+    <section id="view-product-detail" class="view hidden">
+      <button class="btn btn-ghost" id="pd-back">&larr; Back</button>
+      <div class="detail-shell">
+        <div class="gallery card" id="pd-gallery"></div>
+        <div class="info card" id="pd-info"></div>
+      </div>
+      <section id="pd-reviews" class="section"></section>
+      <section class="section">
+        <h3>Related</h3>
+        <div id="pd-related" class="grid"></div>
+      </section>
+    </section>
+
+    <!-- CART -->
+    <section id="view-cart" class="view hidden">
+      <h2>Your Cart</h2>
+      <div id="cart-list" class="card-list"></div>
+      <div class="cart-actions card" style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+        <div>Subtotal: <strong id="cart-subtotal">₹0.00</strong></div>
+        <div class="cart-cta">
+          <button id="btn-checkout" class="btn btn-primary">Checkout</button>
+          <button id="btn-clear-cart" class="btn btn-ghost">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- WISHLIST -->
+    <section id="view-wishlist" class="view hidden">
+      <h2>Wishlist</h2>
+      <div id="wishlist-grid" class="grid"></div>
+    </section>
+
+    <!-- ORDERS -->
+    <section id="view-orders" class="view hidden">
+      <h2>Orders</h2>
+      <div id="orders-list"></div>
+    </section>
+
+    <!-- PROFILE (also show profile if logged in) -->
+    <section id="view-profile" class="view hidden">
+      <h2>Profile</h2>
+      <form id="profile-form" class="card profile-card">
+        <label>Name<input id="profile-name"/></label>
+        <label>Email<input id="profile-email" type="email" disabled/></label>
+        <label>Address<textarea id="profile-address"></textarea></label>
+        <div class="profile-actions" style="display:flex;gap:8px;margin-top:8px">
+          <button id="save-profile" class="btn btn-primary">Save</button>
+          <button id="logout-btn" type="button" class="btn btn-ghost">Logout</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ADMIN -->
+    <section id="view-admin" class="view hidden">
+      <h2>Admin Dashboard</h2>
+      <div class="admin-grid">
+        <div class="card">
+          <h3>Add / Edit Product</h3>
+          <form id="admin-add-form" class="admin-form">
+            <input name="id" type="hidden" />
+            <input name="sku" placeholder="SKU (e.g., ARD-UNO)" />
+            <input name="name" placeholder="Product name" required />
+            <input name="category" placeholder="Category" />
+            <input name="price" placeholder="Price" type="number" required />
+            <input name="stock" placeholder="Stock qty" type="number" />
+            <input name="image" placeholder="Image URL" />
+            <textarea name="desc" placeholder="Short description"></textarea>
+            <textarea name="specs" placeholder='Specs JSON (e.g. {"voltage":"5V"})'></textarea>
+            <div class="admin-actions">
+              <button class="btn btn-primary">Save Product</button>
+              <button id="admin-reset" type="button" class="btn btn-ghost">Reset</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Products</h3>
+          <div id="admin-products-list" class="admin-products-list"></div>
+        </div>
+
+        <div class="card">
+          <h3>Data</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="export-json" class="btn">Export JSON</button>
+            <input id="import-json" type="file" accept=".json" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAFF -->
+    <section id="view-staff" class="view hidden">
+      <h2>Staff Orders</h2>
+      <div id="staff-orders"></div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>© <span id="year"></span> Botronixs</div>
+    <div class="muted">Arduino • Sensors • Modules • Tools</div>
+  </footer>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-inner card">
+      <button class="modal-close" id="modal-close" aria-label="Close modal">&times;</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- product card template -->
+  <template id="tpl-product-card">
+    <article class="card product-card">
+      <img class="pimg" src="" alt="">
+      <h3 class="pname"></h3>
+      <div class="meta pcate"></div>
+      <div class="price pprice"></div>
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-view">View</button>
+        <button class="btn btn-ghost btn-wish"><i class="fa-regular fa-heart"></i></button>
+        <button class="btn btn-primary btn-add">Add</button>
+      </div>
+    </article>
+  </template>
+
+  <script>
+  /* ---------- Combined app.js (refined & integrated) ---------- */
+
+  /* ---------- Helpers ---------- */
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const uid = (p='id') => p + '_' + Math.random().toString(36).slice(2,9);
+  const fmt = n => '₹' + Number(n||0).toFixed(2);
+  const read = (k,d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
+  const write = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+  /* ---------- Keys + Seed ---------- */
+  const LS = {
+    PRODUCTS: 'em_products_v1',
+    CART: 'em_cart_v1',
+    WISH: 'em_wish_v1',
+    ORDERS: 'em_orders_v1',
+    USERS: 'em_users_v1',
+    SESSION: 'em_session_v1'
+  };
+
+  const SEED = [
+    {
+      id: 'arduino_uno',
+      sku: 'ARD-UNO',
+      name: 'Arduino Uno R3',
+      category: 'Microcontrollers',
+      price: 1199,
+      stock: 50,
+      image: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Arduino_Uno_-_R3.jpg',
+      description: 'Official Arduino Uno R3 board for prototyping.',
+      rating: 4.6
+    },
+    {
+      id: 'rpi4',
+      sku: 'RPI-4B',
+      name: 'Raspberry Pi 4 Model B',
+      category: 'Computing Boards',
+      price: 5500,
+      stock: 30,
+      image: 'https://images.unsplash.com/photo-1581092334607-c31d05e1e3cc?w=1000&q=60&auto=format&fit=crop',
+      description: 'Popular single-board computer (Pi 4 Model B).',
+      rating: 4.8
+    },
+    {
+      id: 'esp32',
+      sku: 'ESP32-MOD',
+      name: 'ESP32 Module',
+      category: 'IoT',
+      price: 450,
+      stock: 100,
+      image: 'https://images.unsplash.com/photo-1603791452906-b4dcebeadccd?w=1000&q=60&auto=format&fit=crop',
+      description: 'WiFi and Bluetooth-enabled microcontroller.',
+      rating: 4.4
+    },
+    {
+      id: 'hc_sr04',
+      sku: 'HC-SR04',
+      name: 'HC-SR04 Ultrasonic Sensor',
+      category: 'Sensors',
+      price: 180,
+      stock: 200,
+      image: 'https://images.unsplash.com/photo-1593642532973-d31b6557fa68?w=1000&q=60&auto=format&fit=crop',
+      description: 'Distance measuring ultrasonic sensor.',
+      rating: 4.0
+    },
+    {
+      id: 'breadboard',
+      sku: 'BRD-830',
+      name: 'Breadboard 830 Points',
+      category: 'Prototyping',
+      price: 99,
+      stock: 150,
+      image: 'https://images.unsplash.com/photo-1581093588401-22b063c2a2f0?w=1000&q=60&auto=format&fit=crop',
+      description: 'Full-size breadboard for circuit prototyping.',
+      rating: 4.2
+    }
+  ];
+
+  if(!read(LS.PRODUCTS)) write(LS.PRODUCTS, SEED);
+  if(!read(LS.USERS)) write(LS.USERS, [
+    { id:'admin', name:'Admin', email:'admin@electro.local', password:'admin123', role:'admin' },
+    { id:'staff1', name:'Staff', email:'staff@electro.local', password:'staff123', role:'staff' },
+    { id:'demo', name:'Demo User', email:'user@demo.local', password:'user123', role:'user' }
+  ]);
+  if(!read(LS.ORDERS)) write(LS.ORDERS, []);
+
+  /* ---------- App state ---------- */
+  const App = {
+    products: read(LS.PRODUCTS, []),
+    cart: read(LS.CART, {}),
+    wish: read(LS.WISH, []),
+    orders: read(LS.ORDERS, []),
+    users: read(LS.USERS, []),
+    session: read(LS.SESSION, null),
+    currentProduct: null,
+    filters: { q:'', category:'', price:'', sort:'relevance', page:1, perPage:9 }
+  };
+
+  /* ---------- Save helpers ---------- */
+  function saveProducts(){ write(LS.PRODUCTS, App.products); }
+  function saveCart(){ write(LS.CART, App.cart); updateCartUI(); }
+  function saveWish(){ write(LS.WISH, App.wish); updateWishUI(); }
+  function saveOrders(){ write(LS.ORDERS, App.orders); }
+  function saveUsers(){ write(LS.USERS, App.users); }
+  function saveSession(){ write(LS.SESSION, App.session); }
+
+  /* ---------- UI helpers ---------- */
+  function updateCartUI(){
+    const count = Object.values(App.cart).reduce((s,v)=>s+(v||0),0);
+    const el = $('#cart-count'); if(el) el.textContent = count;
+    const subtotal = Object.keys(App.cart).reduce((s,k)=> {
+      const p = App.products.find(x=>String(x.id)===String(k)); return s + ((p?.price||0) * (App.cart[k]||0));
+    },0);
+    $('#cart-subtotal') && ($('#cart-subtotal').textContent = fmt(subtotal));
+  }
+  function updateWishUI(){ const el = $('#wish-count'); if(el) el.textContent = App.wish.length; }
+  function fmtPrice(n){ return fmt(n); }
+  function setYear(){ $('#year') && ($('#year').textContent = new Date().getFullYear()); }
+
+  /* ---------- Templates ---------- */
+  function createProductCard(p){
+    const tpl = $('#tpl-product-card');
+    if(!tpl) return document.createElement('div');
+    const clone = tpl.content.cloneNode(true);
+    const art = clone.querySelector('.product-card');
+    if(art) art.dataset.id = p.id;
+    const img = clone.querySelector('.pimg'); if(img) img.src = p.image;
+    const name = clone.querySelector('.pname'); if(name) name.textContent = p.name;
+    const cat = clone.querySelector('.pcate'); if(cat) cat.textContent = p.category;
+    const price = clone.querySelector('.pprice'); if(price) price.textContent = fmtPrice(p.price);
+    const btnAdd = clone.querySelector('.btn-add'); if(btnAdd) { btnAdd.dataset.id = p.id; if(p.stock<=0) btnAdd.disabled = true; }
+    const btnWish = clone.querySelector('.btn-wish'); if(btnWish) btnWish.dataset.id = p.id;
+    const btnView = clone.querySelector('.btn-view'); if(btnView) btnView.dataset.id = p.id;
+    return clone;
+  }
+
+  /* ---------- Renderers ---------- */
+  function renderGridById(id, items){
+    const g = $(`#${id}`); if(!g) return;
+    g.innerHTML = '';
+    items.forEach(p => g.appendChild(createProductCard(p)));
+  }
+  function renderHome(){
+    renderGridById('deals-grid', App.products.slice(0,3));
+    renderGridById('featured-grid', App.products.slice(0,6));
+    renderCategoryNav();
+  }
+  function renderProducts(){
+    const arr = applyFilters(App.products);
+    const start = (App.filters.page-1) * App.filters.perPage;
+    const pageItems = arr.slice(start, start + App.filters.perPage);
+    renderGridById('products-grid', pageItems);
+    renderPagination(Math.ceil(arr.length / App.filters.perPage), App.filters.page);
+    populateFilterCategories();
+  }
+  function renderProductDetail(){
+    const p = App.products.find(x=>x.id === App.currentProduct);
+    if(!p) return showView('products');
+    $('#pd-gallery').innerHTML = `<img src="${p.image}" alt="${p.name}">`;
+    $('#pd-info').innerHTML = `<h2>${p.name}</h2><div class="meta">${p.category} • ${p.sku||''}</div><div class="price">${fmtPrice(p.price)}</div><p style="margin-top:12px;color:var(--muted)">${p.description||''}</p><div style="margin-top:12px;display:flex;gap:10px"><button id="pd-add" class="btn btn-primary" ${p.stock<=0?'disabled':''}>Add to cart</button><button id="pd-wish" class="btn btn-ghost">Wishlist</button></div>`;
+    setTimeout(()=>{ const a = $('#pd-add'); if(a) a.onclick = ()=> addToCart(p.id); const w = $('#pd-wish'); if(w) w.onclick = ()=> toggleWish(p.id); },0);
+    const related = App.products.filter(x=>x.category===p.category && x.id!==p.id).slice(0,4);
+    renderGridById('pd-related', related);
+  }
+  function renderCart(){
+    const el = $('#cart-list'); if(!el) return; el.innerHTML = '';
+    const ids = Object.keys(App.cart);
+    if(ids.length===0){ el.innerHTML = '<p class="muted">Your cart is empty</p>'; $('#cart-subtotal').textContent = fmtPrice(0); return; }
+    let subtotal = 0;
+    ids.forEach(id => {
+      const p = App.products.find(x=>String(x.id)===String(id)); if(!p) return;
+      const q = App.cart[id] || 0;
+      const line = p.price * q; subtotal += line;
+      const row = document.createElement('div'); row.className='card cart-row';
+      row.innerHTML = `<img src="${p.image}" alt="${p.name}"><div style="flex:1"><strong>${p.name}</strong><div class="meta">${p.sku||''}</div></div><div style="text-align:right">${fmtPrice(line)}<div style="margin-top:8px"><button class="btn" data-op="decr" data-id="${id}">-</button><span style="margin:0 8px">${q}</span><button class="btn" data-op="incr" data-id="${id}">+</button></div></div><button class="btn" data-op="rem" data-id="${id}">Remove</button>`;
+      row.querySelectorAll('button[data-op]').forEach(b=> b.addEventListener('click', ()=>{
+        const op = b.dataset.op, pid = b.dataset.id;
+        if(op==='decr') changeQty(pid, Math.max(1, (App.cart[pid]||1)-1));
+        if(op==='incr') changeQty(pid, (App.cart[pid]||0)+1);
+        if(op==='rem'){ delete App.cart[pid]; saveCart(); renderCart(); updateCartUI(); }
+      }));
+      el.appendChild(row);
+    });
+    $('#cart-subtotal').textContent = fmtPrice(subtotal);
+  }
+  function renderWishlist(){ const g = $('#wishlist-grid'); if(!g) return; g.innerHTML=''; const items = App.products.filter(p=>App.wish.includes(String(p.id))); if(!items.length){ g.innerHTML='<p class="muted">No items in wishlist</p>'; return; } items.forEach(p=> g.appendChild(createProductCard(p))); }
+  function renderOrders(){ const el = $('#orders-list'); if(!el) return; if(!App.orders.length){ el.innerHTML = '<p class="muted">No orders yet</p>'; return; } el.innerHTML = App.orders.map(o=>`<div class="card" style="margin-bottom:8px"><strong>Order ${o.id}</strong> — <span class="pill">${o.status}</span> — ${new Date(o.created_at).toLocaleString()}<div style="margin-top:8px">${o.items.map(i=>`<div>${i.qty} × ${i.name}</div>`).join('')}</div><div style="margin-top:8px">Total: ${fmtPrice(o.total)}</div></div>`).join(''); }
+
+  /* ---------- Filters & pagination ---------- */
+  function applyFilters(arr){
+    let r = arr.slice();
+    const f = App.filters;
+    if(f.q) r = r.filter(p => (p.name + ' ' + (p.description||'')).toLowerCase().includes(f.q.toLowerCase()));
+    if(f.category) r = r.filter(p=>p.category===f.category);
+    if(f.price){
+      if(f.price.includes('-')){ const [lo,hi] = f.price.split('-').map(Number); r = r.filter(p=>p.price>=lo && p.price<=hi); }
+      else if(f.price.endsWith('+')){ const lo = Number(f.price.replace('+','')); r = r.filter(p=>p.price>=lo); }
+    }
+    if(f.sort==='price-asc') r.sort((a,b)=>a.price-b.price);
+    if(f.sort==='price-desc') r.sort((a,b)=>b.price-a.price);
+    if(f.sort==='rating-desc') r.sort((a,b)=>(b.rating||0)-(a.rating||0));
+    return r;
+  }
+  function renderPagination(totalPages, current){
+    const wrap = $('#pagination'); if(!wrap) return; wrap.innerHTML=''; for(let i=1;i<=Math.max(1,totalPages);i++){ const b = document.createElement('button'); b.className = i===current ? 'btn btn-primary' : 'btn'; b.textContent = i; b.addEventListener('click', ()=>{ App.filters.page = i; renderProducts(); }); wrap.appendChild(b); }
+  }
+  function populateFilterCategories(){ const cats = Array.from(new Set(App.products.map(p=>p.category||'General'))); $('#filter-category').innerHTML = `<option value="">All</option>` + cats.map(c=>`<option value="${c}">${c}</option>`).join(''); $('#filter-category').value = App.filters.category || ''; }
+
+  /* ---------- Category nav ---------- */
+  function renderCategoryNav(){ const cats = Array.from(new Set(App.products.map(p=>p.category||'General'))); /* optional - could render a bar */ }
+
+  /* ---------- Cart operations ---------- */
+  function addToCart(id, qty=1){
+    const pid = String(id);
+    App.cart[pid] = (App.cart[pid]||0) + qty;
+    saveCart();
+    updateCartUI();
+    smallToast('Added to cart');
+  }
+  function changeQty(pid, qty){ App.cart[pid] = qty; if(qty<=0) delete App.cart[pid]; saveCart(); renderCart(); updateCartUI(); }
+  function toggleWish(id){ const pid = String(id); if(App.wish.includes(pid)) App.wish = App.wish.filter(x=>x!==pid); else App.wish.push(pid); saveWish(); smallToast('Wishlist updated'); }
+
+  /* ---------- Product open ---------- */
+  function openProduct(id){ App.currentProduct = id; renderProductDetail(); showView('product-detail'); }
+
+  /* ---------- Modal ---------- */
+  function openModal(html){ $('#modal-body').innerHTML = html; $('#modal').classList.remove('hidden'); $('#modal').setAttribute('aria-hidden','false'); }
+  function closeModal(){ $('#modal').classList.add('hidden'); $('#modal-body').innerHTML = ''; $('#modal').setAttribute('aria-hidden','true'); }
+
+  /* ---------- Checkout ---------- */
+  $('#btn-checkout')?.addEventListener('click', ()=> {
+    const items = Object.keys(App.cart).map(id => { const p = App.products.find(x=>String(x.id)===String(id)); return { product_id:id, name:p.name, qty:App.cart[id], unit_price:p.price }; });
+    if(items.length===0){ alert('Cart empty'); return; }
+    const total = items.reduce((s,i)=>s + i.qty * i.unit_price, 0);
+    openModal(`<h3>Checkout</h3>
+      <form id="checkout-form" class="card" style="display:flex;flex-direction:column;gap:8px">
+        <input id="cx-name" placeholder="Full name" required value="${App.session?.name||''}">
+        <input id="cx-email" placeholder="Email" type="email" required value="${App.session?.email||''}">
+        <textarea id="cx-addr" placeholder="Shipping address" required>${App.session?.address||''}</textarea>
+        <div>Total: <strong>${fmtPrice(total)}</strong></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-primary" type="submit">Place Order</button><button type="button" class="btn btn-ghost" id="cx-cancel">Cancel</button></div>
+      </form>`);
+    $('#cx-cancel').onclick = closeModal;
+    $('#checkout-form').onsubmit = (e)=> {
+      e.preventDefault();
+      const order = { id: uid('ord'), created_at: new Date().toISOString(), status:'created', items, total, customer:{ name: $('#cx-name').value, email: $('#cx-email').value, address: $('#cx-addr').value } };
+      App.orders.unshift(order); saveOrders();
+      App.cart = {}; saveCart(); renderCart(); updateCartUI();
+      closeModal();
+      alert('Order placed — ' + order.id);
+      renderOrders();
+    };
+  });
+
+  /* ---------- Admin: Add / Edit / Delete ---------- */
+  $('#admin-add-form')?.addEventListener('submit', (e)=> {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const id = fd.get('id') || uid('p');
+    let specs = fd.get('specs') || '';
+    try{ specs = JSON.parse(specs || '{}'); }catch{ specs = {}; }
+    const prod = { id, sku: fd.get('sku') || '', name: fd.get('name'), category: fd.get('category')||'General', price: Number(fd.get('price')||0), stock: Number(fd.get('stock')||0), image: fd.get('image') || 'https://picsum.photos/seed/' + Math.random() + '/800/600', datasheet: '', description: fd.get('desc')||'', specs, rating:4.0, created_at: Date.now() };
+    const idx = App.products.findIndex(p=>p.id===id);
+    if(idx>=0) App.products[idx] = prod; else App.products.unshift(prod);
+    saveProducts(); renderAdmin(); renderProducts(); e.target.reset(); smallToast('Saved product');
+  });
+  function renderAdmin(){
+    $('#admin-products-list').innerHTML = App.products.map(p=>`<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid rgba(0,0,0,0.04)"><div><strong>${p.name}</strong><div class="meta">${p.category} • ${p.sku}</div></div><div><button class="btn admin-edit" data-id="${p.id}">Edit</button> <button class="btn admin-del" data-id="${p.id}">Delete</button></div></div>`).join('');
+    $$('#admin-products-list .admin-del').forEach(b=>b.addEventListener('click', ()=> { if(confirm('Delete product?')){ App.products = App.products.filter(x=>x.id!==b.dataset.id); saveProducts(); renderAdmin(); renderProducts(); } }));
+    $$('#admin-products-list .admin-edit').forEach(b=>b.addEventListener('click', ()=> { const p = App.products.find(x=>x.id===b.dataset.id); const form = $('#admin-add-form'); form.elements['id'].value = p.id; form.elements['sku'].value = p.sku; form.elements['name'].value = p.name; form.elements['category'].value = p.category; form.elements['price'].value = p.price; form.elements['stock'].value = p.stock; form.elements['image'].value = p.image; form.elements['desc'].value = p.description; form.elements['specs'].value = JSON.stringify(p.specs || {}, null,2); }));
+  }
+  $('#export-json')?.addEventListener('click', ()=> { const blob = new Blob([JSON.stringify({ products: App.products, orders: App.orders, users: App.users }, null, 2)], { type:'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'botronixs-data.json'; document.body.appendChild(a); a.click(); a.remove(); });
+  $('#import-json')?.addEventListener('change', async e=> { const f = e.target.files[0]; if(!f) return; const txt = await f.text(); try{ const data = JSON.parse(txt); if(Array.isArray(data.products)){ App.products = data.products; saveProducts(); renderProducts(); renderAdmin(); } if(Array.isArray(data.orders)){ App.orders = data.orders; saveOrders(); } }catch(err){ alert('Invalid JSON'); } });
+
+  /* ---------- Staff ---------- */
+  function renderStaff(){
+    $('#staff-orders').innerHTML = App.orders.length ? App.orders.map(o=>{ const ops=['picked','packed','shipped','delivered','cancelled']; return `<div class="card" style="margin-bottom:8px"><div><strong>${o.id}</strong> — <span class="pill">${o.status}</span> — ${new Date(o.created_at).toLocaleString()}</div><div style="margin-top:8px">${o.items.map(it=>`<div>${it.qty} × ${it.name}</div>`).join('')}</div><div style="margin-top:8px">${ops.map(s=>`<button class="btn staff-op" data-id="${o.id}" data-op="${s}">${s}</button>`).join(' ')}</div></div>` }).join('') : '<p class="muted">No orders</p>';
+    $$('#staff-orders .staff-op').forEach(b=>b.addEventListener('click', ()=>{ const id=b.dataset.id, op=b.dataset.op; const ord = App.orders.find(x=>x.id===id); if(ord){ ord.status = op; saveOrders(); renderStaff(); renderOrders(); smallToast('Status updated'); } }));
+  }
+
+  /* ---------- Auth (simple) ---------- */
+  function openAuthModal(){
+    openModal(`<h3>Login / Signup</h3><form id="mini-auth" class="card" style="display:flex;flex-direction:column;gap:8px">
+      <input id="m-email" placeholder="Email" type="email" required>
+      <input id="m-pass" placeholder="Password" type="password" required>
+      <div style="display:flex;gap:8px">
+        <button id="m-login" class="btn btn-primary" type="submit">Login</button>
+        <button id="m-signup" type="button" class="btn btn-ghost">Sign up</button>
+      </div>
+      <div class="muted" style="margin-top:8px">Admin demo: admin@electro.local / admin123 • Staff demo: staff@electro.local / staff123</div>
+    </form>`);
+    $('#mini-auth').onsubmit = (e)=>{ e.preventDefault(); const email=$('#m-email').value.trim(), pass=$('#m-pass').value; const u = App.users.find(x=>x.email===email && x.password===pass); if(u){ App.session={id:u.id,name:u.name,email:u.email,role:u.role}; saveSession(); smallToast('Welcome '+u.name); closeModal(); updateAfterAuth(); } else alert('Invalid credentials'); };
+    $('#m-signup').onclick = ()=>{ const email=$('#m-email').value.trim(), pass=$('#m-pass').value; if(!email||!pass){ alert('Enter email & password'); return; } if(App.users.some(x=>x.email===email)){ alert('Account exists'); return; } const nu={id:uid('u'),name:email.split('@')[0],email,password:pass,role:'user'}; App.users.push(nu); saveUsers(); App.session={id:nu.id,name:nu.name,email:nu.email,role:nu.role}; saveSession(); closeModal(); smallToast('Account created'); updateAfterAuth(); };
+  }
+
+  /* ---------- After auth adjustments ---------- */
+  function updateAfterAuth(){
+    // show admin links if admin or staff
+    const links = $('#admin-links');
+    if(App.session && (App.session.role === 'admin' || App.session.role === 'staff')){
+      links.classList.remove('hidden');
+    } else links.classList.add('hidden');
+
+    // show profile or login hint
+    if(App.session){
+      $('#nav-profile').title = 'Profile — ' + App.session.name;
+      $('#nav-profile i').className = 'fa-regular fa-circle-user';
+      // show admin/staff panels flags on left
+    } else {
+      $('#nav-profile').title = 'Profile';
+      $('#nav-profile i').className = 'fa-regular fa-user';
+    }
+    saveSession();
+    renderAdmin(); renderStaff();
+  }
+
+  /* ---------- Smaller UI helpers ---------- */
+  function smallToast(msg){ const old = document.title; document.title = msg; setTimeout(()=>document.title = old, 1100); }
+  function showView(name){
+    $$('.view').forEach(v=>v.classList.add('hidden'));
+    const sel = $(`#view-${name}`);
+    if(sel) sel.classList.remove('hidden');
+    if(name==='home') renderHome();
+    if(name==='products') renderProducts();
+    if(name==='product-detail') renderProductDetail();
+    if(name==='cart') renderCart();
+    if(name==='wishlist') renderWishlist();
+    if(name==='admin') { if(App.session?.role==='admin') renderAdmin(); else alert('Admin access only'); }
+    if(name==='staff') { if(App.session?.role==='staff' || App.session?.role==='admin') renderStaff(); else alert('Staff access only'); }
+    if(name==='orders') renderOrders();
+    if(name==='profile') {
+      if(!App.session){ openAuthModal(); return; }
+      $('#profile-email').value = App.session.email || '';
+      $('#profile-name').value = App.session.name || '';
+      $('#profile-address').value = App.session.address || '';
+    }
+  }
+
+  /* ---------- Wire top controls ---------- */
+  $('#nav-home')?.addEventListener('click', ()=> showView('home'));
+  $('#home-shop')?.addEventListener('click', ()=> showView('products'));
+  $('#home-products')?.addEventListener('click', ()=> showView('products'));
+  $('#nav-cart')?.addEventListener('click', ()=> { renderCart(); showView('cart'); });
+  $('#nav-wishlist')?.addEventListener('click', ()=> { renderWishlist(); showView('wishlist'); });
+  $('#nav-orders')?.addEventListener('click', ()=> showView('orders'));
+  $('#nav-profile')?.addEventListener('click', ()=> {
+    if(App.session) showView('profile'); else openAuthModal();
+  });
+  $('#open-admin')?.addEventListener('click', ()=> { if(App.session?.role==='admin') showView('admin'); else { openAuthModal(); } });
+  $('#open-staff')?.addEventListener('click', ()=> { if(App.session?.role==='staff' || App.session?.role==='admin') showView('staff'); else { openAuthModal(); } });
+  $('#pd-back')?.addEventListener('click', ()=> showView('products'));
+  $('#modal-close')?.addEventListener('click', closeModal);
+
+  $('#apply-filters')?.addEventListener('click', ()=>{ App.filters.category = $('#filter-category').value; App.filters.price = $('#filter-price').value; App.filters.sort = $('#sort-by').value; App.filters.page = 1; renderProducts(); });
+  $('#reset-filters')?.addEventListener('click', ()=>{ App.filters={q:'',category:'',price:'',sort:'relevance',page:1,perPage:9}; renderProducts(); });
+
+  /* ---------- Theme toggle ---------- */
+  $('#btn-theme')?.addEventListener('click', ()=> {
+    const root = document.documentElement;
+    const cur = root.getAttribute('data-theme');
+    if(cur==='dark'){ root.removeAttribute('data-theme'); $('#btn-theme i').className='fa-solid fa-moon'; localStorage.removeItem('bot_theme'); }
+    else{ root.setAttribute('data-theme','dark'); $('#btn-theme i').className='fa-solid fa-sun'; localStorage.setItem('bot_theme','dark'); }
+  });
+
+  /* ---------- Init boot ---------- */
+  function boot(){
+    updateCartUI(); updateWishUI(); renderHome(); renderProducts(); renderAdmin(); renderOrders(); renderStaff();
+    setYear();
+    // wire search quick
+    $('#nav-search')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ App.filters.q = e.target.value; App.filters.page = 1; renderProducts(); showView('products'); }});
+    $('#page-search')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ App.filters.q = e.target.value; App.filters.page = 1; renderProducts(); }});
+    // wire clear cart
+    $('#btn-clear-cart')?.addEventListener('click', ()=>{ if(confirm('Clear cart?')){ App.cart={}; saveCart(); renderCart(); updateCartUI(); }});
+    // wire product buttons via delegation
+    $('#app').addEventListener('click', (e)=> {
+      const add = e.target.closest('.btn-add'); if(add){ addToCart(add.dataset.id); return; }
+      const wish = e.target.closest('.btn-wish'); if(wish){ toggleWish(wish.dataset.id); return; }
+      const view = e.target.closest('.btn-view'); if(view){ openProduct(view.dataset.id); return; }
+    });
+
+    // load theme preference
+    if(localStorage.getItem('bot_theme') === 'dark'){ document.documentElement.setAttribute('data-theme','dark'); $('#btn-theme i').className='fa-solid fa-sun'; }
+
+    // initial UI after auth
+    App.session = read(LS.SESSION, App.session);
+    updateAfterAuth();
+  }
+  boot();
+
+  /* ---------- Expose for debugging ---------- */
+  window.App = App;
+  window.addToCart = addToCart;
+  window.openProduct = openProduct;
+
+  /* ---------- Profile save & logout ---------- */
+  $('#save-profile')?.addEventListener('click', (e)=> {
+    e.preventDefault();
+    if(!App.session) return alert('Not logged in');
+    const name = $('#profile-name').value.trim(); const addr = $('#profile-address').value.trim();
+    const u = App.users.find(x=>x.email===App.session.email);
+    if(u){ u.name = name; u.address = addr; saveUsers(); App.session.name = name; App.session.address = addr; saveSession(); smallToast('Profile saved'); }
+  });
+  $('#logout-btn')?.addEventListener('click', ()=>{ if(confirm('Logout?')){ localStorage.removeItem(LS.SESSION); App.session=null; saveSession(); updateAfterAuth(); showView('home'); smallToast('Logged out'); } });
+
+  </script>
+</body>
+</html>
