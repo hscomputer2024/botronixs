@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eshop Premium Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-card {
+      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.4s ease-in-out;
+    }
+    .auth-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+<div class="w-full max-w-md mx-auto p-6 auth-card border border-gray-200">
+  <div class="text-center mb-6">
+    <i class="fa-solid fa-bag-shopping text-3xl text-black"></i>
+    <h1 class="text-2xl font-semibold mt-2 text-gray-900 tracking-tight">Eshop Premium</h1>
+    <p class="text-gray-500 text-sm">Login or Register to start shopping</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex justify-center mb-4">
+    <button id="loginBtn" class="w-1/2 py-2 font-semibold border-b-2 border-black text-black">Login</button>
+    <button id="registerBtn" class="w-1/2 py-2 font-semibold border-b-2 border-transparent text-gray-500">Register</button>
+  </div>
+
+  <!-- Login Form -->
+  <form id="loginForm" class="space-y-5" method="POST" action="#">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+      <input type="email" name="email" placeholder="you@example.com" class="w-full rounded-xl border-gray-300 p-3 focus:ring-black focus:border-black" required>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+      <div class="relative">
+        <input type="password" name="password" placeholder="••••••••" class="w-full rounded-xl border-gray-300 p-3 pr-10 focus:ring-black focus:border-black" required>
+        <i class="fa-solid fa-lock absolute right-3 top-3 text-gray-400"></i>
+      </div>
+    </div>
+
+    <div class="flex justify-between text-sm">
+      <a href="#" class="text-gray-600 hover:text-black font-medium">Forgot password?</a>
+    </div>
+
+    <button type="submit" class="w-full bg-black hover:bg-gray-800 text-white rounded-xl py-2.5 text-base font-medium shadow-md transition">
+      Sign In
+    </button>
+  </form>
+
+  <!-- Registration Form -->
+  <form id="registerForm" class="space-y-5 hidden" method="POST" action="#">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+      <input type="text" name="name" placeholder="John Doe" class="w-full rounded-xl border-gray-300 p-3 focus:ring-black focus:border-black" required>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Contact No.</label>
+      <input type="tel" name="contact" placeholder="+91 9876543210" class="w-full rounded-xl border-gray-300 p-3 focus:ring-black focus:border-black" required>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+      <input type="email" name="email" placeholder="you@example.com" class="w-full rounded-xl border-gray-300 p-3 focus:ring-black focus:border-black" required>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+      <input type="password" name="password" placeholder="••••••••" class="w-full rounded-xl border-gray-300 p-3 focus:ring-black focus:border-black" required>
+    </div>
+
+    <button type="submit" class="w-full bg-black hover:bg-gray-800 text-white rounded-xl py-2.5 text-base font-medium shadow-md transition">
+      Register
+    </button>
+  </form>
+
+  <p class="text-center text-sm text-gray-600 mt-6">
+    Need help? <a href="#" class="text-black font-semibold hover:underline">Contact Support</a>
+  </p>
+</div>
+
+<script>
+  const loginBtn = document.getElementById('loginBtn');
+  const registerBtn = document.getElementById('registerBtn');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+
+  loginBtn.addEventListener('click', () => {
+    loginForm.classList.remove('hidden');
+    registerForm.classList.add('hidden');
+    loginBtn.classList.add('border-black', 'text-black');
+    registerBtn.classList.remove('border-black', 'text-black');
+    registerBtn.classList.add('text-gray-500');
+  });
+
+  registerBtn.addEventListener('click', () => {
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
+    registerBtn.classList.add('border-black', 'text-black');
+    loginBtn.classList.remove('border-black', 'text-black');
+    loginBtn.classList.add('text-gray-500');
+  });
+</script>
+
+</body>
+</html>
