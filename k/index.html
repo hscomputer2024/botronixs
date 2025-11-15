@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gray-100 flex items-center justify-center">
+
+  <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+    <h2 class="text-3xl font-bold text-center mb-6">Login</h2>
+
+    <form id="loginForm" class="space-y-4">
+      <input id="username" type="text" placeholder="Username"
+        class="w-full border rounded-lg p-3" required />
+
+      <input id="password" type="password" placeholder="Password"
+        class="w-full border rounded-lg p-3" required />
+
+      <button class="w-full bg-blue-500 text-white py-3 rounded-lg text-lg">
+        Login
+      </button>
+    </form>
+
+    <p class="mt-4 text-center">
+      Don't have an account?
+      <a href="register.html" class="text-blue-600">Register</a>
+    </p>
+  </div>
+
+  <script>
+    const defaultUser = { username: "admin", password: "admin123" };
+
+    // Save default user if first time
+    if (!localStorage.getItem("users")) {
+      localStorage.setItem("users", JSON.stringify([defaultUser]));
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      let username = document.getElementById("username").value;
+      let password = document.getElementById("password").value;
+
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+
+      let userFound = users.find(
+        (u) => u.username === username && u.password === password
+      );
+
+      if (userFound) {
+        localStorage.setItem("loggedIn", username);
+        window.location.href = "admin.html"; // 🔥 Redirect
+      } else {
+        alert("Invalid username or password");
+      }
+    });
+  </script>
+</body>
+</html>

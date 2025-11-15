@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Full CRUD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gray-100 flex">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 bg-white shadow-lg min-h-screen p-5">
+    <h1 class="text-2xl font-bold mb-6">Admin Panel</h1>
+
+    <nav>
+      <ul class="space-y-3">
+        <li><button class="tab-btn w-full text-left p-2 rounded bg-blue-100" data-tab="products">Products</button></li>
+        <li><button class="tab-btn w-full text-left p-2 rounded" data-tab="orders">Orders</button></li>
+        <li><button class="tab-btn w-full text-left p-2 rounded" data-tab="users">Users</button></li>
+        <li><button id="logoutBtn" class="w-full text-left p-2 rounded bg-red-200">Logout</button></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <main class="flex-1 p-8">
+
+    <!-- PRODUCTS TAB -->
+    <section id="products" class="tab-section">
+      <h2 class="text-3xl font-bold mb-4">Products</h2>
+
+      <button onclick="openProductForm()" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+        + Add Product
+      </button>
+
+      <table class="w-full bg-white shadow">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="p-2">ID</th>
+            <th class="p-2">Name</th>
+            <th class="p-2">Price</th>
+            <th class="p-2">Action</th>
+          </tr>
+        </thead>
+        <tbody id="productList"></tbody>
+      </table>
+    </section>
+
+    <!-- ORDERS TAB -->
+    <section id="orders" class="tab-section hidden">
+      <h2 class="text-3xl font-bold mb-4">Orders</h2>
+
+      <button onclick="openOrderForm()" class="bg-green-500 text-white px-4 py-2 rounded mb-4">
+        + Add Order
+      </button>
+
+      <table class="w-full bg-white shadow">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="p-2">ID</th>
+            <th class="p-2">Customer</th>
+            <th class="p-2">Total</th>
+            <th class="p-2">Action</th>
+          </tr>
+        </thead>
+        <tbody id="orderList"></tbody>
+      </table>
+    </section>
+
+    <!-- USERS TAB -->
+    <section id="users" class="tab-section hidden">
+      <h2 class="text-3xl font-bold mb-4">Users</h2>
+
+      <button onclick="openUserForm()" class="bg-purple-500 text-white px-4 py-2 rounded mb-4">
+        + Add User
+      </button>
+
+      <table class="w-full bg-white shadow">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="p-2">ID</th>
+            <th class="p-2">Username</th>
+            <th class="p-2">Action</th>
+          </tr>
+        </thead>
+        <tbody id="userList"></tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <!-- PRODUCT FORM POPUP -->
+  <div id="productFormPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white p-6 rounded w-96">
+      <h2 class="text-xl font-bold mb-4">Product Form</h2>
+
+      <input id="p_name" type="text" placeholder="Name" class="w-full p-2 border rounded mb-2">
+      <input id="p_price" type="number" placeholder="Price" class="w-full p-2 border rounded mb-2">
+      <input id="p_id" type="hidden">
+
+      <button onclick="saveProduct()" class="bg-blue-500 px-4 py-2 text-white rounded">Save</button>
+      <button onclick="closeProductForm()" class="bg-gray-400 px-4 py-2 text-white rounded">Cancel</button>
+    </div>
+  </div>
+
+
+  <!-- JS START -->
+  <script>
+
+    // -------------------------
+    // LOGIN CHECK
+    // -------------------------
+    if (!localStorage.getItem("loggedIn")) {
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("logoutBtn").onclick = () => {
+      localStorage.removeItem("loggedIn");
+      window.location.href = "login.html";
+    };
+
+
+    // -------------------------
+    // TAB SWITCHING
+    // -------------------------
+    const tabs = document.querySelectorAll(".tab-btn");
+    const sections = document.querySelectorAll(".tab-section");
+
+    tabs.forEach(btn => {
+      btn.addEventListener("click", () => {
+        let tab = btn.getAttribute("data-tab");
+
+        sections.forEach(sec => sec.classList.add("hidden"));
+        document.getElementById(tab).classList.remove("hidden");
+
+        tabs.forEach(b => b.classList.remove("bg-blue-100"));
+        btn.classList.add("bg-blue-100");
+      });
+    });
+
+
+    // -------------------------
+    // PRODUCT CRUD
+    // -------------------------
+    function loadProducts() {
+      let products = JSON.parse(localStorage.getItem("products")) || [];
+      let html = "";
+
+      products.forEach((p, index) => {
+        html += `
+          <tr>
+            <td class="p-2">${index + 1}</td>
+            <td class="p-2">${p.name}</td>
+            <td class="p-2">₹${p.price}</td>
+            <td class="p-2">
+              <button onclick="editProduct(${index})" class="bg-yellow-400 px-3 py-1 rounded">Edit</button>
+              <button onclick="deleteProduct(${index})" class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+            </td>
+          </tr>`;
+      });
+
+      document.getElementById("productList").innerHTML = html;
+    }
+
+    function openProductForm() {
+      document.getElementById("p_id").value = "";
+      document.getElementById("p_name").value = "";
+      document.getElementById("p_price").value = "";
+      document.getElementById("productFormPopup").classList.remove("hidden");
+    }
+
+    function closeProductForm() {
+      document.getElementById("productFormPopup").classList.add("hidden");
+    }
+
+    function saveProduct() {
+      let name = document.getElementById("p_name").value;
+      let price = document.getElementById("p_price").value;
+      let id = document.getElementById("p_id").value;
+
+      let products = JSON.parse(localStorage.getItem("products")) || [];
+
+      if (id === "") {
+        products.push({ name, price });
+      } else {
+        products[id] = { name, price };
+      }
+
+      localStorage.setItem("products", JSON.stringify(products));
+
+      closeProductForm();
+      loadProducts();
+    }
+
+    function editProduct(id) {
+      let products = JSON.parse(localStorage.getItem("products")) || [];
+      let p = products[id];
+
+      document.getElementById("p_id").value = id;
+      document.getElementById("p_name").value = p.name;
+      document.getElementById("p_price").value = p.price;
+
+      document.getElementById("productFormPopup").classList.remove("hidden");
+    }
+
+    function deleteProduct(id) {
+      let products = JSON.parse(localStorage.getItem("products")) || [];
+      products.splice(id, 1);
+      localStorage.setItem("products", JSON.stringify(products));
+      loadProducts();
+    }
+
+    loadProducts();
+
+
+    // -------------------------
+    // ORDERS CRUD
+    // -------------------------
+    function loadOrders() {
+      let orders = JSON.parse(localStorage.getItem("orders")) || [];
+      let html = "";
+
+      orders.forEach((o, index) => {
+        html += `
+          <tr>
+            <td class="p-2">${index + 1}</td>
+            <td class="p-2">${o.customer}</td>
+            <td class="p-2">₹${o.total}</td>
+            <td class="p-2">
+              <button onclick="deleteOrder(${index})" class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+            </td>
+          </tr>`;
+      });
+
+      document.getElementById("orderList").innerHTML = html;
+    }
+
+    function openOrderForm() {
+      let customer = prompt("Enter customer name:");
+      let total = prompt("Enter total amount:");
+
+      if (customer && total) {
+        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+        orders.push({ customer, total });
+        localStorage.setItem("orders", JSON.stringify(orders));
+        loadOrders();
+      }
+    }
+
+    function deleteOrder(id) {
+      let orders = JSON.parse(localStorage.getItem("orders")) || [];
+      orders.splice(id, 1);
+      localStorage.setItem("orders", JSON.stringify(orders));
+      loadOrders();
+    }
+
+    loadOrders();
+
+
+    // -------------------------
+    // USERS CRUD
+    // -------------------------
+    function loadUsers() {
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      let html = "";
+
+      users.forEach((u, index) => {
+        html += `
+          <tr>
+            <td class="p-2">${index + 1}</td>
+            <td class="p-2">${u.username}</td>
+            <td class="p-2">
+              <button onclick="deleteUser(${index})" class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+            </td>
+          </tr>`;
+      });
+
+      document.getElementById("userList").innerHTML = html;
+    }
+
+    function openUserForm() {
+      let username = prompt("Enter username:");
+      let password = prompt("Enter password:");
+
+      if (username && password) {
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+        users.push({ username, password });
+        localStorage.setItem("users", JSON.stringify(users));
+        loadUsers();
+      }
+    }
+
+    function deleteUser(id) {
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      users.splice(id, 1);
+      localStorage.setItem("users", JSON.stringify(users));
+      loadUsers();
+    }
+
+    loadUsers();
+
+  </script>
+</body>
+</html>
