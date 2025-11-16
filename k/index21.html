@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electronics & Electrical Form</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f0f3f8;
+        padding: 20px;
+    }
+    .form-box {
+        background: #fff;
+        padding: 20px;
+        width: 420px;
+        margin: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+        margin-bottom: 12px;
+        text-align: center;
+        color: #333;
+    }
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        display: block;
+        color: #444;
+    }
+    select, input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #bbb;
+        margin-top: 4px;
+        font-size: 15px;
+    }
+    .small {
+        width: 140px;
+        display: inline-block;
+        margin-right: 10px;
+    }
+    .medium {
+        width: 220px;
+        display: inline-block;
+    }
+    .group-row {
+        margin-top: 12px;
+    }
+</style>
+</head>
+<body>
+
+<div class="form-box">
+    <h2>Product Selection</h2>
+
+    <!-- Category -->
+    <label>Select Category</label>
+    <select id="category">
+        <option value="">-- Choose Category --</option>
+        <option value="electronics">Electronics</option>
+        <option value="electrical">Electrical</option>
+    </select>
+
+    <!-- Product List (Auto Changes) -->
+    <label style="margin-top:15px;">Select Product</label>
+    <select id="product"></select>
+
+    <!-- Small + Medium Input Fields -->
+    <div class="group-row">
+        <label>Product Name</label>
+        <input type="text" id="pname" class="medium" readonly>
+    </div>
+
+    <div class="group-row">
+        <label>Price (INR)</label>
+        <input type="text" id="price" class="small" readonly>
+    </div>
+</div>
+
+<script>
+// Database (Online-style product list)
+const products = {
+    electronics: [
+        { name: "Raspberry Pi 4", price: 5500 },
+        { name: "Arduino Uno", price: 1200 },
+        { name: "ESP32 WiFi Board", price: 480 }
+    ],
+    electrical: [
+        { name: "3-Pin Socket", price: 120 },
+        { name: "Mini MCB Switch", price: 340 },
+        { name: "LED 9W Bulb", price: 80 }
+    ]
+};
+
+// Populate Products on Category Change
+document.getElementById("category").addEventListener("change", function() {
+    const cat = this.value;
+    const productSelect = document.getElementById("product");
+
+    productSelect.innerHTML = "<option value=''>-- Choose Product --</option>";
+
+    if (products[cat]) {
+        products[cat].forEach((p, i) => {
+            productSelect.innerHTML += `<option value="${i}">${p.name}</option>`;
+        });
+    }
+
+    // Clear fields
+    document.getElementById("pname").value = "";
+    document.getElementById("price").value = "";
+});
+
+// Auto-fill Name & Price
+document.getElementById("product").addEventListener("change", function() {
+    const cat = document.getElementById("category").value;
+    const index = this.value;
+
+    if (products[cat] && products[cat][index]) {
+        document.getElementById("pname").value = products[cat][index].name;
+        document.getElementById("price").value = products[cat][index].price;
+    }
+});
+</script>
+
+</body>
+</html>
