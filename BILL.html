@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Botronixs</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<!-- jsPDF for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --muted:#6b7280; --accent:#0b63ff;
+    --accent-2:#1f2937; --success:#10b981; --danger:#ef4444;
+    --glass: rgba(255,255,255,0.6);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    background:linear-gradient(180deg,#f7f9ff 0%, var(--bg) 100%); color:#0b1221;
+    padding:22px;
+  }
+  .wrap{max-width:1200px;margin:0 auto}
+  .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7c5cff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px}
+  .title{font-weight:700;font-size:18px}
+  .muted{color:var(--muted)}
+  .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(11,25,50,0.06)}
+  .grid{display:grid;grid-template-columns:1fr 380px;gap:18px}
+  @media (max-width:980px){ .grid{grid-template-columns:1fr} }
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  input[type="text"], input[type="number"], select, textarea { width:100%; padding:10px;border-radius:8px;border:1px solid #eef4ff;background:#fff;font-size:14px }
+  .row{display:flex;gap:12px;align-items:center}
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:700}
+  .btn.ghost{background:#fff;color:var(--accent);border:1px solid #e6ecff}
+  .small{padding:8px 10px;font-size:14px}
+  .image-preview{width:100%;height:220px;border-radius:10px;border:1px dashed #eef4ff;display:flex;align-items:center;justify-content:center;background:#fbfdff;overflow:hidden}
+  .image-preview img{max-width:100%;max-height:100%;object-fit:contain}
+  .field-note{font-size:12px;color:#94a3b8;margin-top:6px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .left-col .card { margin-bottom:18px; }
+  .meta { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .muted-small{font-size:13px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse}
+  .inline {display:inline-block}
+  .badge { display:inline-block;padding:6px 10px;border-radius:999px;background:#f1f7ff;color:var(--accent);font-weight:700;font-size:12px }
+  .search {display:flex;gap:8px;align-items:center}
+  .list-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+  .product-row { padding:10px;border-bottom:1px solid #f3f7ff;display:flex;justify-content:space-between;align-items:center}
+  .small-muted{font-size:12px;color:#94a3b8}
+  .dots {color:#94a3b8}
+  /* modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(6,11,20,0.45);display:none;align-items:center;justify-content:center;z-index:9999}
+  .modal{background:#fff;border-radius:10px;max-width:700px;width:96%;padding:18px;box-shadow:0 20px 50px rgba(2,6,23,0.35)}
+  .modal .header{margin-bottom:10px}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:640px){ .grid-2{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">B</div>
+        <div>
+          <div class="title">Botronixs — Billing & Products</div>
+          <div class="muted-small"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="openProducts" class="btn ghost small">Products</button>
+        <button id="exportAllJson" class="btn ghost small">Export All</button>
+        <button id="importJsonBtn" class="btn small">Import JSON</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: Invoice form + Items -->
+      <div class="left-col">
+        <div class="card">
+          <div class="meta">
+            <div>
+              <div style="font-weight:700">Create Invoice</div>
+              <div class="muted-small"></div>
+            </div>
+            <div class="badge">Botronixs</div>
+          </div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div style="min-width:220px">
+              <label>Invoice #</label>
+              <input id="invoiceNo" type="text" placeholder="INV-0001">
+            </div>
+            <div style="min-width:180px">
+              <label>Date</label>
+              <input id="invoiceDate" type="date">
+            </div>
+            <div style="min-width:160px">
+              <label>Due date</label>
+              <input id="dueDate" type="date">
+            </div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
+            <div style="flex:1">
+              <label>Bill to (Customer)</label>
+              <input id="custName" type="text" placeholder="Customer name">
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <input id="custPhone" type="text" placeholder="Phone" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eef4ff">
+                <input id="custEmail" type="text" placeholder="Email" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eef4ff">
+              </div>
+              <textarea id="custAddress" rows="2" placeholder="Address" style="width:100%;margin-top:8px;padding:10px;border-radius:8px;border:1px solid #eef4ff"></textarea>
+            </div>
+
+            <div style="width:320px">
+              <label>Company</label>
+              <input id="companyName" type="text" value="Botronixs">
+              <div class="small-muted" style="margin-top:8px">Purchase Type</div>
+              <div style="display:flex;gap:8px;margin-top:6px">
+                <select id="purchaseType" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eef4ff">
+                  <option value="non_gst">Non GST</option>
+                  <option value="gst">GST (enter GST no.)</option>
+                </select>
+                <input id="gstNo" type="text" placeholder="24AAACC1206D1" style="flex:1;padding:8px;border-radius:8px;border:1px solid #eef4ff;display:none">
+              </div>
+            </div>
+          </div>
+
+          <!-- Items table -->
+          <div style="margin-top:14px" class="items card" id="itemsCard">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:700">Items</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div class="search">
+                  <input id="itemSearch" type="text" placeholder="Search items..." style="padding:8px;border-radius:8px;border:1px solid #eef4ff">
+                </div>
+                <button id="addItemBtn" class="btn small">+ Add Item</button>
+              </div>
+            </div>
+
+            <div style="overflow:auto;margin-top:12px">
+              <table style="width:100%;border-collapse:collapse">
+                <thead>
+                  <tr style="background:#fbfdff;border-bottom:1px solid #f1f5ff">
+                    <th style="width:28%;padding:10px">Item & description</th>
+                    <th style="width:70px;padding:10px">Unit</th>
+                    <th style="width:80px;padding:10px;text-align:right">Qty</th>
+                    <th style="width:120px;padding:10px;text-align:right">Price (₹)</th>
+                    <th style="width:80px;padding:10px;text-align:right">Disc %</th>
+                    <th style="width:80px;padding:10px;text-align:right">Tax %</th>
+                    <th style="width:80px;padding:10px;text-align:right">Cess %</th>
+                    <th style="width:120px;padding:10px;text-align:right">Amount (₹)</th>
+                    <th style="width:70px;padding:10px;text-align:center"> </th>
+                  </tr>
+                </thead>
+                <tbody id="itemsBody"></tbody>
+              </table>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:12px;flex-wrap:wrap">
+              <div style="display:flex;gap:8px;align-items:center">
+                <button id="saveInvoice" class="btn small">Save Invoice</button>
+                <button id="clearItems" class="btn ghost small">Clear Items</button>
+                <div class="small-muted">Autosave: <span id="autosaveTime">—</span></div>
+              </div>
+
+              <div style="display:flex;gap:8px;align-items:center">
+                <div><label style="font-size:12px;color:var(--muted)">Global Tax %</label><input id="globalTax" type="number" value="0" style="width:80px;padding:8px;border-radius:8px;border:1px solid #eef4ff"></div>
+                <div><label style="font-size:12px;color:var(--muted)">Discount (₹)</label><input id="globalDisc" type="number" value="0" style="width:100px;padding:8px;border-radius:8px;border:1px solid #eef4ff"></div>
+                <div><label style="font-size:12px;color:var(--muted)">Status</label>
+                  <select id="invoiceStatus" style="padding:8px;border-radius:8px;border:1px solid #eef4ff">
+                    <option value="draft">Draft</option><option value="unpaid">Unpaid</option><option value="paid">Paid</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center">
+              <div style="flex:1">
+                <label>Notes</label>
+                <textarea id="invoiceNotes" rows="3" style="width:100%;padding:10px;border-radius:8px;border:1px solid #eef4ff"></textarea>
+              </div>
+
+              <div style="width:320px">
+                <div class="small-muted">Invoice preview</div>
+                <div style="margin-top:8px;padding:12px;border-radius:10px;border:1px solid #f1f5ff;background:#fbfdff">
+                  <div style="display:flex;justify-content:space-between"><div class="small-muted">Subtotal</div><div id="subtotal">₹0</div></div>
+                  <div style="display:flex;justify-content:space-between"><div class="small-muted">Discount</div><div id="discVal">₹0</div></div>
+                  <div style="display:flex;justify-content:space-between"><div class="small-muted">Tax (<span id="taxPctLabel">0</span>%)</div><div id="taxVal">₹0</div></div>
+                  <div style="display:flex;justify-content:space-between"><div class="small-muted">Cess</div><div id="cessVal">₹0</div></div>
+                  <div style="border-top:1px dashed #eef4ff;padding-top:10px;margin-top:6px;display:flex;justify-content:space-between"><div style="font-weight:800">Total</div><div id="grandTotal" style="font-weight:800">₹0</div></div>
+                  <div style="display:flex;gap:8px;margin-top:10px">
+                    <button id="markPaid" class="btn small">Mark Paid</button>
+                    <button id="printInvoice" class="btn ghost small">Print</button>
+                    <button id="downloadInvoiceJson" class="btn ghost small">Download JSON</button>
+                    <button id="downloadPdf" class="btn small">Download PDF</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Product quick add & preview -->
+      <div>
+        <div class="card">
+          <div style="font-weight:700;margin-bottom:8px">Quick Bill</div>
+
+          <label>Default product</label>
+          <select id="defaultProduct" style="margin-bottom:6px">
+            <option value="">-- choose --</option>
+            <option value="Arduino">Arduino</option>
+            <option value="Raspberry Pi">Raspberry Pi</option>
+            <option value="Breadboard">Breadboard</option>
+          </select>
+
+          <label style="margin-top:8px">Item name</label>
+          <input id="itemName" type="text" placeholder="Item name (or choose default)">
+
+          <div style="display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:8px">
+            <div>
+              <label>Unit</label>
+              <select id="itemUnit"><option value="NOS">NOS</option><option value="PCS">PCS</option><option value="MTR">MTR</option></select>
+            </div>
+            <div>
+              <label>Qty</label>
+              <input id="itemQty" type="number" value="1" min="0">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+            <div>
+              <label>Purchase Price (₹)</label>
+              <input id="itemPrice" type="number" min="0" step="0.01" value="0">
+            </div>
+            <div>
+              <label>Disc %</label>
+              <input id="itemDisc" type="number" min="0" value="0" step="0.01">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+            <div>
+              <label>Tax %</label>
+              <input id="itemTax" type="number" min="0" value="0" step="0.01">
+            </div>
+            <div>
+              <label>Cess %</label>
+              <input id="itemCess" type="number" min="0" value="0" step="0.01">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button id="addQuickItem" class="btn">Add to invoice</button>
+            <button id="resetQuick" class="btn ghost">Reset</button>
+          </div>
+
+          <div style="height:14px"></div>
+
+          <div class="image-preview" id="quickImage">
+            <div class="muted-small">Image preview</div>
+          </div>
+
+          <div style="margin-top:10px" class="field-note">Selecting defaults fills price & unit automatically. Use this area to quickly add items to invoice.</div>
+        </div>
+
+        <div style="height:14px"></div>
+
+        <div class="card">
+          <div style="font-weight:700;margin-bottom:8px">Products (Local)</div>
+          <div class="list-actions">
+            <button id="clearAllProducts" class="btn ghost small">Delete All</button>
+            <button id="importProducts" class="btn ghost small">Import</button>
+          </div>
+          <div id="productsList" style="margin-top:8px;max-height:260px;overflow:auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+    <div class="muted-small">© Botronixs — Billing & Products Module</div>
+  </div>
+
+  <!-- modal view for product / invoices -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" id="modalContent">
+      <div class="header" style="align-items:flex-start">
+        <div style="flex:1">
+          <div style="font-weight:700" id="modalTitle">Product</div>
+          <div class="small-muted" id="modalSubtitle">Details</div>
+        </div>
+        <div>
+          <button id="closeModal" class="btn ghost small">Close</button>
+        </div>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+<script>
+/* ============================
+   Botronixs - Completed single-file JS
+   ============================ */
+
+/* Default product catalog (arduino, raspberry pi, breadboard) */
+const defaultCatalog = [
+  { name:'Arduino', unit:'NOS', purchase:550, sale:660, gst:18, cess:0, sku:'HT-ARD-001', category:'Microcontroller', image:'https://upload.wikimedia.org/wikipedia/commons/3/38/Arduino_Logo.svg' },
+  { name:'Raspberry Pi', unit:'NOS', purchase:4200, sale:5040, gst:18, cess:0, sku:'HT-RPI-001', category:'SBC', image:'https://upload.wikimedia.org/wikipedia/commons/3/3f/Raspberry_Pi_Logo.svg' },
+  { name:'Breadboard', unit:'PCS', purchase:60, sale:72, gst:12, cess:0, sku:'HT-BRD-001', category:'Components', image:'https://upload.wikimedia.org/wikipedia/commons/6/6b/Breadboard.jpg' }
+];
+
+/* LocalStorage keys */
+const LS_PRODUCTS = 'Botronixs_products_v1';
+const LS_INVOICES = 'Botronixs_invoices_v1';
+const LS_DRAFT_INVOICE = 'Botronixs_current_invoice_v1';
+
+/* DOM refs - invoice area */
+const invoiceNo = document.getElementById('invoiceNo');
+const invoiceDate = document.getElementById('invoiceDate');
+const dueDate = document.getElementById('dueDate');
+const custName = document.getElementById('custName');
+const custPhone = document.getElementById('custPhone');
+const custEmail = document.getElementById('custEmail');
+const custAddress = document.getElementById('custAddress');
+const companyName = document.getElementById('companyName');
+const purchaseType = document.getElementById('purchaseType');
+const gstNo = document.getElementById('gstNo');
+
+const itemsBody = document.getElementById('itemsBody');
+const addItemBtn = document.getElementById('addItemBtn');
+const itemSearch = document.getElementById('itemSearch');
+
+const globalTax = document.getElementById('globalTax');
+const globalDisc = document.getElementById('globalDisc');
+const invoiceStatus = document.getElementById('invoiceStatus');
+const invoiceNotes = document.getElementById('invoiceNotes');
+
+const subtotalEl = document.getElementById('subtotal');
+const discValEl = document.getElementById('discVal');
+const taxValEl = document.getElementById('taxVal');
+const cessValEl = document.getElementById('cessVal');
+const grandTotalEl = document.getElementById('grandTotal');
+const taxPctLabel = document.getElementById('taxPctLabel');
+
+const saveInvoiceBtn = document.getElementById('saveInvoice');
+const clearItemsBtn = document.getElementById('clearItems');
+const markPaidBtn = document.getElementById('markPaid');
+const printInvoiceBtn = document.getElementById('printInvoice');
+const downloadInvoiceJson = document.getElementById('downloadInvoiceJson');
+const downloadPdfBtn = document.getElementById('downloadPdf');
+
+const autosaveTime = document.getElementById('autosaveTime');
+
+/* Quick-add refs */
+const defaultProduct = document.getElementById('defaultProduct');
+const itemName = document.getElementById('itemName');
+const itemUnit = document.getElementById('itemUnit');
+const itemQty = document.getElementById('itemQty');
+const itemPrice = document.getElementById('itemPrice');
+const itemDisc = document.getElementById('itemDisc');
+const itemTax = document.getElementById('itemTax');
+const itemCess = document.getElementById('itemCess');
+const addQuickItem = document.getElementById('addQuickItem');
+const resetQuick = document.getElementById('resetQuick');
+const quickImage = document.getElementById('quickImage');
+
+/* Products list area */
+const productsList = document.getElementById('productsList');
+const clearAllProductsBtn = document.getElementById('clearAllProducts');
+const importProductsBtn = document.getElementById('importProducts');
+const openProductsBtn = document.getElementById('openProducts');
+const exportAllJsonBtn = document.getElementById('exportAllJson');
+const importJsonBtn = document.getElementById('importJsonBtn');
+
+/* Modal */
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalContent = document.getElementById('modalContent');
+const modalBody = document.getElementById('modalBody');
+const modalTitle = document.getElementById('modalTitle');
+const modalSubtitle = document.getElementById('modalSubtitle');
+const closeModalBtn = document.getElementById('closeModal');
+
+/* Invoice state */
+let invoice = {
+  meta: { invoiceNo: `INV-${String(Math.floor(Math.random()*90000)+10000)}`, date: new Date().toISOString().slice(0,10), due:'', company:'Botronixs' },
+  customer: { name:'', phone:'', email:'', address:'' },
+  items: [], // { id, name, desc, unit, qty, price, discPct, taxPct, cessPct }
+  globalTax: 0,
+  globalDisc: 0,
+  notes: '',
+  status: 'draft',
+  purchaseType: 'non_gst',
+  gstNo: ''
+};
+
+/* Initialize date */
+invoiceDate.value = new Date().toISOString().slice(0,10);
+
+/* Utility functions */
+function escapeHtml(s){ if(s === undefined || s === null) return ''; return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[m]); }
+function formatCurrency(n){ return '₹' + (Number(n) || 0).toLocaleString('en-IN'); }
+function round2(n){ return Math.round((Number(n)||0) * 100) / 100; }
+
+/* Load products from localStorage or seed with defaults if none exist */
+function loadProducts(){
+  const raw = localStorage.getItem(LS_PRODUCTS);
+  if(!raw){
+    // seed defaults
+    localStorage.setItem(LS_PRODUCTS, JSON.stringify(defaultCatalog.map(p => (({
+      id: Date.now() + Math.floor(Math.random()*9999),
+      name: p.name,
+      sku: p.sku,
+      category: p.category,
+      unit: p.unit,
+      purchasePrice: p.purchase,
+      salePrice: p.sale,
+      gst: p.gst,
+      cess: p.cess,
+      stockQty: 0,
+      description: '',
+      image: p.image,
+      savedAt: new Date().toISOString()
+    })))));
+  }
+}
+
+/* Get products array */
+function getProducts(){ return JSON.parse(localStorage.getItem(LS_PRODUCTS) || '[]'); }
+
+/* Render products list (right panel) */
+function renderProductsList(){
+  const arr = getProducts();
+  productsList.innerHTML = '';
+  if(arr.length === 0){
+    productsList.innerHTML = '<div class="small-muted">No products saved.</div>';
+    return;
+  }
+  arr.slice(0,50).forEach((p, idx) => {
+    const el = document.createElement('div');
+    el.className = 'product-row';
+    el.innerHTML = `<div>
+        <div style="font-weight:700">${escapeHtml(p.name)}</div>
+        <div class="small-muted">${escapeHtml(p.sku || '')} • ${escapeHtml(p.category || '')}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn ghost small" data-load="${idx}">Load</button>
+        <button class="btn ghost small" data-view="${idx}">View</button>
+        <button class="btn ghost small" data-del="${idx}">Del</button>
+      </div>`;
+    productsList.appendChild(el);
+  });
+
+  // handlers
+  productsList.querySelectorAll('button[data-load]').forEach(btn=>{
+    btn.onclick = ()=> {
+      const idx = Number(btn.dataset.load);
+      loadProductToQuickForm(idx);
+    };
+  });
+  productsList.querySelectorAll('button[data-view]').forEach(btn=>{
+    btn.onclick = ()=> {
+      const idx = Number(btn.dataset.view);
+      viewProductModal(idx);
+    };
+  });
+  productsList.querySelectorAll('button[data-del]').forEach(btn=>{
+    btn.onclick = ()=> {
+      const idx = Number(btn.dataset.del);
+      // Option 1: Simple delete
+      if(!confirm('Delete this product?')) return;
+      const arr = getProducts();
+      arr.splice(idx,1);
+      localStorage.setItem(LS_PRODUCTS, JSON.stringify(arr));
+      renderProductsList();
+    };
+  });
+}
+
+/* Load a product into quick-add form */
+function loadProductToQuickForm(idx){
+  const arr = getProducts();
+  const p = arr[idx];
+  if(!p) return;
+  itemName.value = p.name || '';
+  itemUnit.value = p.unit || 'NOS';
+  itemQty.value = 1;
+  itemPrice.value = p.purchasePrice || 0;
+  itemDisc.value = 0;
+  itemTax.value = p.gst || 0;
+  itemCess.value = p.cess || 0;
+  showQuickImage(p.image);
+}
+
+/* Show quick image */
+function showQuickImage(src){
+  quickImage.innerHTML = '';
+  if(!src){
+    quickImage.innerHTML = '<div class="muted-small">Image preview</div>';
+    return;
+  }
+  const img = document.createElement('img');
+  img.src = src; img.alt = 'img';
+  quickImage.appendChild(img);
+}
+
+/* View product modal */
+function viewProductModal(idx){
+  const arr = getProducts();
+  const p = arr[idx];
+  if(!p) return;
+  modalTitle.innerText = p.name;
+  modalSubtitle.innerText = `SKU: ${p.sku || '—'} • ${p.category || '—'}`;
+  modalBody.innerHTML = `
+    <div class="grid-2">
+      <div>
+        ${p.image ? `<img src="${escapeHtml(p.image)}" style="max-width:100%;border-radius:8px;margin-bottom:8px">` : '<div class="muted-small">No image</div>'}
+        <div style="font-weight:700">${escapeHtml(p.name)}</div>
+        <div class="small-muted">${escapeHtml(p.sku || '')}</div>
+      </div>
+      <div>
+        <div style="margin-bottom:8px"><strong>Purchase:</strong> ${formatCurrency(p.purchasePrice)}</div>
+        <div style="margin-bottom:8px"><strong>Sale:</strong> ${formatCurrency(p.salePrice)}</div>
+        <div style="margin-bottom:8px"><strong>GST:</strong> ${p.gst || 0}%</div>
+        <div style="margin-bottom:8px"><strong>Cess:</strong> ${p.cess || 0}%</div>
+        <div style="margin-top:8px"><strong>Category:</strong> ${escapeHtml(p.category || '')}</div>
+        <div style="margin-top:8px"><strong>Unit:</strong> ${escapeHtml(p.unit || '')}</div>
+        <div style="margin-top:8px"><strong>Stock:</strong> ${p.stockQty || 0}</div>
+      </div>
+    </div>
+  `;
+  openModal();
+}
+
+/* Modal controls */
+function openModal(){ modalBackdrop.style.display = 'flex'; }
+function closeModal(){ modalBackdrop.style.display = 'none'; }
+closeModalBtn.onclick = closeModal;
+modalBackdrop.onclick = (e)=>{ if(e.target === modalBackdrop) closeModal(); };
+
+/* Add quick item to invoice */
+function addQuickItemToInvoice(){
+  if(!itemName.value.trim()){ alert('Enter item name'); return; }
+  const newItem = {
+    id: Date.now() + Math.floor(Math.random()*9999),
+    name: itemName.value.trim(),
+    desc: '',
+    unit: itemUnit.value || 'NOS',
+    qty: Number(itemQty.value) || 1,
+    price: Number(itemPrice.value) || 0,
+    discPct: Number(itemDisc.value) || 0,
+    taxPct: Number(itemTax.value) || 0,
+    cessPct: Number(itemCess.value) || 0
+  };
+  invoice.items.push(newItem);
+  renderInvoiceItems();
+  saveDraft();
+}
+
+/* Reset quick form */
+resetQuick.onclick = function(){ itemName.value=''; itemUnit.value='NOS'; itemQty.value=1; itemPrice.value=0; itemDisc.value=0; itemTax.value=0; itemCess.value=0; quickImage.innerHTML='<div class="muted-small">Image preview</div>'; };
+
+/* Items: render & handlers */
+function renderInvoiceItems(filterText=''){
+  itemsBody.innerHTML = '';
+  invoice.items.forEach((it, idx) => {
+    if(filterText && !it.name.toLowerCase().includes(filterText.toLowerCase())) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="padding:10px">
+        <input data-idx="${idx}" data-field="name" class="item-input" value="${escapeHtml(it.name)}" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eef4ff">
+        <div style="margin-top:6px"><input data-idx="${idx}" data-field="desc" class="item-input" placeholder="Description" value="${escapeHtml(it.desc)}" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eef4ff"></div>
+      </td>
+      <td style="padding:10px;text-align:center"><input data-idx="${idx}" data-field="unit" value="${escapeHtml(it.unit || 'NOS')}" style="width:100%;padding:8px;border-radius:8px;border:1px solid #eef4ff"></td>
+      <td style="padding:10px;text-align:right"><input data-idx="${idx}" data-field="qty" type="number" value="${it.qty}" style="width:70px;padding:8px;border-radius:8px;border:1px solid #eef4ff;text-align:right"></td>
+      <td style="padding:10px;text-align:right"><input data-idx="${idx}" data-field="price" type="number" value="${it.price}" style="width:110px;padding:8px;border-radius:8px;border:1px solid #eef4ff;text-align:right"></td>
+      <td style="padding:10px;text-align:right"><input data-idx="${idx}" data-field="discPct" type="number" value="${it.discPct||0}" style="width:70px;padding:8px;border-radius:8px;border:1px solid #eef4ff;text-align:right"></td>
+      <td style="padding:10px;text-align:right"><input data-idx="${idx}" data-field="taxPct" type="number" value="${it.taxPct||0}" style="width:70px;padding:8px;border-radius:8px;border:1px solid #eef4ff;text-align:right"></td>
+      <td style="padding:10px;text-align:right"><input data-idx="${idx}" data-field="cessPct" type="number" value="${it.cessPct||0}" style="width:70px;padding:8px;border-radius:8px;border:1px solid #eef4ff;text-align:right"></td>
+      <td style="padding:10px;text-align:right" class="amount-cell"> ${formatCurrency(lineTotal(it))} </td>
+      <td style="padding:10px;text-align:center">
+        <button class="btn ghost small" data-dup="${idx}">⧉</button>
+        <button class="btn ghost small" data-del="${idx}">✕</button>
+      </td>
+    `;
+    itemsBody.appendChild(tr);
+  });
+
+  // attach input handlers
+  itemsBody.querySelectorAll('input[data-field]').forEach(inp=>{
+    inp.oninput = (e)=> {
+      const idx = Number(e.target.dataset.idx);
+      const field = e.target.dataset.field;
+      let val = e.target.value;
+      if(['qty','price','discPct','taxPct','cessPct'].includes(field)) val = Number(val) || 0;
+      invoice.items[idx][field] = val;
+      saveDraft();
+      updateTotals();
+      // update amount cell for that row
+      const rows = itemsBody.querySelectorAll('tr');
+      const row = rows[idx];
+      if(row){
+        const amtCell = row.querySelector('.amount-cell');
+        if(amtCell) amtCell.innerText = formatCurrency(lineTotal(invoice.items[idx]));
+      }
+    };
+  });
+
+  // dup / del buttons
+  itemsBody.querySelectorAll('button[data-del]').forEach(b=>{
+    b.onclick = ()=> {
+      const idx = Number(b.dataset.del);
+      invoice.items.splice(idx,1);
+      renderInvoiceItems(itemSearch.value || '');
+      saveDraft();
+      updateTotals();
+    };
+  });
+  itemsBody.querySelectorAll('button[data-dup]').forEach(b=>{
+    b.onclick = ()=> {
+      const idx = Number(b.dataset.dup);
+      invoice.items.splice(idx+1,0, JSON.parse(JSON.stringify(invoice.items[idx])) );
+      renderInvoiceItems(itemSearch.value || '');
+      saveDraft();
+      updateTotals();
+    };
+  });
+  updateTotals();
+}
+
+/* Calculation per item */
+function lineTotal(item){
+  const qty = Number(item.qty)||0;
+  const price = Number(item.price)||0;
+  const discPct = Number(item.discPct)||0;
+  const taxPct = Number(item.taxPct)||0;
+  const cessPct = Number(item.cessPct)||0;
+  const base = qty * price;
+  const discount = (base * (discPct/100));
+  const taxable = Math.max(0, base - discount);
+  const tax = taxable * (taxPct/100);
+  const cess = taxable * (cessPct/100);
+  return round2(taxable + tax + cess);
+}
+
+/* Totals */
+function updateTotals(){
+  // Subtotal (sum of base prices before item-level discounts)
+  const subtotal = invoice.items.reduce((s,it)=> s + ((Number(it.qty)||0) * (Number(it.price)||0)), 0);
+
+  // Line totals include item-level taxes and cess and item-level discount
+  const lineTotals = invoice.items.reduce((s,it)=> s + lineTotal(it), 0);
+
+  // total cess from items (display only)
+  const totalCessFromItems = invoice.items.reduce((s,it)=>{
+    const qty = Number(it.qty)||0; const price = Number(it.price)||0; const disc = Number(it.discPct)||0; const cess = Number(it.cessPct)||0;
+    const base = qty * price; const discAmt = base * (disc/100); const tbase = Math.max(0, base - discAmt); return s + (tbase * (cess/100));
+  }, 0);
+
+  const globalDiscVal = Number(invoice.globalDisc) || 0;
+  const taxPct = Number(invoice.globalTax) || 0;
+
+  // Apply global discount to the lineTotals (which already included item taxes & cess)
+  const afterDisc = Math.max(0, lineTotals - globalDiscVal);
+
+  // Global tax is applied after discounts on the remaining amount
+  const globalTaxVal = afterDisc * (taxPct/100);
+
+  // Grand total = amount after discounts (including item tax & cess) + global tax
+  const grand = round2(afterDisc + globalTaxVal);
+
+  // Update UI
+  subtotalEl.innerText = formatCurrency(round2(subtotal));
+  discValEl.innerText = formatCurrency(round2(globalDiscVal));
+  taxValEl.innerText = formatCurrency(round2(globalTaxVal));
+  cessValEl.innerText = formatCurrency(round2(totalCessFromItems));
+  grandTotalEl.innerText = formatCurrency(grand);
+  taxPctLabel.innerText = taxPct;
+}
+
+/* Sync UI fields into invoice object before saving/printing/exporting */
+function syncUIToInvoice(){
+  invoice.meta.invoiceNo = invoiceNo.value || invoice.meta.invoiceNo;
+  invoice.meta.date = invoiceDate.value || invoice.meta.date;
+  invoice.meta.due = dueDate.value || invoice.meta.due;
+  invoice.meta.company = companyName.value || invoice.meta.company;
+  invoice.customer.name = custName.value || '';
+  invoice.customer.phone = custPhone.value || '';
+  invoice.customer.email = custEmail.value || '';
+  invoice.customer.address = custAddress.value || '';
+  invoice.globalTax = Number(globalTax.value) || 0;
+  invoice.globalDisc = Number(globalDisc.value) || 0;
+  invoice.notes = invoiceNotes.value || '';
+  invoice.status = invoiceStatus.value || invoice.status;
+  invoice.purchaseType = purchaseType.value || invoice.purchaseType;
+  invoice.gstNo = gstNo.value || invoice.gstNo;
+}
+
+/* Save invoice to localStorage (snapshot) */
+function saveInvoice(){
+  syncUIToInvoice();
+  const all = JSON.parse(localStorage.getItem(LS_INVOICES) || '[]');
+  const snapshot = JSON.parse(JSON.stringify(invoice));
+  snapshot.meta.savedAt = new Date().toISOString();
+  all.unshift(snapshot);
+  localStorage.setItem(LS_INVOICES, JSON.stringify(all.slice(0,200)));
+  alert('Invoice saved locally.');
+  saveDraft(); // also update draft
+}
+
+/* Download current invoice JSON */
+function downloadInvoice(){
+  syncUIToInvoice();
+  const data = JSON.stringify(invoice, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `${invoice.meta.invoiceNo||'invoice'}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* Print invoice (simple window) */
+function printInvoice(){
+  syncUIToInvoice();
+  const win = window.open('', '_blank', 'width=900,height=700');
+  const html = buildPrintableInvoiceHtml();
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(), 400);
+}
+
+/* Build printable html */
+function buildPrintableInvoiceHtml(){
+  const itemsHtml = invoice.items.map(it=>{
+    return `<tr><td style="padding:6px">${escapeHtml(it.name)}<div style="font-size:12px;color:#666">${escapeHtml(it.desc||'')}</div></td><td style="text-align:right;padding:6px">${it.qty}</td><td style="text-align:right;padding:6px">₹${(it.price||0).toLocaleString('en-IN')}</td><td style="text-align:right;padding:6px">₹${lineTotal(it).toLocaleString('en-IN')}</td></tr>`;
+  }).join('');
+  const subtotal = invoice.items.reduce((s,it)=> s + ((Number(it.qty)||0) * (Number(it.price)||0)), 0);
+  const globalDiscVal = Number(invoice.globalDisc)||0;
+  const taxPct = Number(invoice.globalTax)||0;
+  const afterDisc = Math.max(0, invoice.items.reduce((s,it)=> s + lineTotal(it), 0) - globalDiscVal);
+  const globalTaxVal = afterDisc * (taxPct/100);
+  const grand = round2(afterDisc + globalTaxVal);
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Invoice ${escapeHtml(invoice.meta.invoiceNo)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>body{font-family:Poppins,Arial;padding:20px;color:#111}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #eee;padding:8px}</style>
+  </head><body>
+  <h2>${escapeHtml(invoice.meta.company || 'Company')}</h2>
+  <div style="display:flex;justify-content:space-between"><div><strong>Invoice:</strong> ${escapeHtml(invoice.meta.invoiceNo)}</div><div><strong>Date:</strong> ${escapeHtml(invoice.meta.date)}</div></div>
+  <div style="margin-top:10px"><strong>Bill to:</strong><br>${escapeHtml(invoice.customer.name)}<br>${escapeHtml(invoice.customer.address)}</div>
+  <hr>
+  <table><thead><tr><th style="text-align:left">Item</th><th style="text-align:right">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>
+  <hr>
+  <div style="text-align:right">Subtotal: ₹${subtotal.toLocaleString('en-IN')}</div>
+  <div style="text-align:right">Discount: ₹${globalDiscVal.toLocaleString('en-IN')}</div>
+  <div style="text-align:right">Global Tax (${taxPct}%): ₹${round2(globalTaxVal).toLocaleString('en-IN')}</div>
+  <div style="text-align:right;font-weight:800">Grand total: ₹${grand.toLocaleString('en-IN')}</div>
+  <div style="margin-top:10px">${escapeHtml(invoice.notes || '')}</div>
+  </body></html>`;
+}
+
+/* Save current invoice as draft */
+function saveDraft(){
+  syncUIToInvoice();
+  localStorage.setItem(LS_DRAFT_INVOICE, JSON.stringify(invoice));
+  autosaveTime.innerText = new Date().toLocaleTimeString();
+}
+
+/* Load draft if present */
+function loadDraft(){
+  const raw = localStorage.getItem(LS_DRAFT_INVOICE);
+  if(!raw) return;
+  try{
+    const obj = JSON.parse(raw);
+    // merge safely
+    invoice = Object.assign(invoice, obj);
+    invoice.items = obj.items || invoice.items;
+    refreshInvoiceUI();
+  }catch(e){}
+}
+
+/* Refresh UI from invoice state */
+function refreshInvoiceUI(){
+  invoiceNo.value = invoice.meta.invoiceNo || '';
+  invoiceDate.value = invoice.meta.date || new Date().toISOString().slice(0,10);
+  dueDate.value = invoice.meta.due || '';
+  companyName.value = invoice.meta.company || '';
+  custName.value = invoice.customer.name || '';
+  custPhone.value = invoice.customer.phone || '';
+  custEmail.value = invoice.customer.email || '';
+  custAddress.value = invoice.customer.address || '';
+  purchaseType.value = invoice.purchaseType || 'non_gst';
+  gstNo.style.display = (invoice.purchaseType === 'gst') ? 'block' : 'none';
+  gstNo.value = invoice.gstNo || '';
+  globalTax.value = invoice.globalTax || 0;
+  globalDisc.value = invoice.globalDisc || 0;
+  invoiceStatus.value = invoice.status || 'draft';
+  invoiceNotes.value = invoice.notes || '';
+  renderInvoiceItems();
+  updateTotals();
+}
+
+/* Add empty item */
+function addEmptyItem(){
+  invoice.items.push({ id: Date.now()+Math.floor(Math.random()*999), name:'New product / service', desc:'', unit:'NOS', qty:1, price:0, discPct:0, taxPct:0, cessPct:0 });
+  renderInvoiceItems();
+  saveDraft();
+}
+
+/* Add item from default catalog (by name) - used for autofill */
+function addItemByDefault(name){
+  const d = defaultCatalog.find(x=>x.name===name);
+  if(!d) return;
+  const row = { id: Date.now()+Math.floor(Math.random()*999), name:d.name, desc:'', unit:d.unit, qty:1, price:d.purchase || 0, discPct:0, taxPct:d.gst||0, cessPct:d.cess||0 };
+  invoice.items.push(row);
+  renderInvoiceItems();
+  saveDraft();
+}
+
+/* jsPDF PDF generation for invoice (basic) */
+async function generateInvoicePDF(){
+  syncUIToInvoice();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const pad = 40;
+  doc.setFontSize(16); doc.text('Invoice', pad, 50);
+  doc.setFontSize(11); doc.text(`Invoice #: ${invoice.meta.invoiceNo}`, pad, 76); doc.text(`Date: ${invoice.meta.date}`, pad, 92);
+  doc.text(`Bill to: ${invoice.customer.name || ''}`, pad, 118);
+  let y = 150;
+  doc.setFontSize(10);
+  doc.text('Item', pad, y); doc.text('Qty', 380, y); doc.text('Price', 450, y); doc.text('Total', 520, y);
+  y += 14;
+  for(const it of invoice.items){
+    if(y > 720){ doc.addPage(); y = 40; }
+    const line = `${it.name}`;
+    doc.text(line, pad, y);
+    doc.text(String(it.qty), 380, y);
+    doc.text(String(round2(it.price)), 450, y);
+    doc.text(String(round2(lineTotal(it))), 520, y);
+    y += 16;
+  }
+  y += 12;
+  doc.text(`Subtotal: ${subtotalEl.innerText}`, 400, y);
+  y += 16;
+  doc.text(`Discount: ${discValEl.innerText}`, 400, y);
+  y += 16;
+  doc.text(`Tax: ${taxValEl.innerText}`, 400, y);
+  y += 20;
+  doc.setFontSize(12); doc.text(`Grand Total: ${grandTotalEl.innerText}`, 400, y);
+  doc.save((invoice.meta.invoiceNo || 'invoice') + '.pdf');
+}
+
+/* Event bindings */
+addItemBtn.onclick = ()=> addEmptyItem();
+itemSearch.oninput = ()=> renderInvoiceItems(itemSearch.value || '');
+addQuickItem.onclick = ()=> { addQuickItemToInvoice(); resetQuick.click(); };
+resetQuick.onclick = ()=> resetQuick.click();
+saveInvoiceBtn.onclick = ()=> saveInvoice();
+clearItemsBtn.onclick = ()=> { if(confirm('Clear all items?')){ invoice.items = []; renderInvoiceItems(); saveDraft(); } };
+markPaidBtn.onclick = ()=> { invoice.status='paid'; invoiceStatus.value='paid'; saveInvoice(); updateTotals(); };
+downloadInvoiceJson.onclick = ()=> downloadInvoice();
+printInvoiceBtn.onclick = ()=> printInvoice();
+downloadPdfBtn.onclick = ()=> generateInvoicePDF();
+
+/* purchase type toggle */
+purchaseType.onchange = ()=> {
+  invoice.purchaseType = purchaseType.value;
+  gstNo.style.display = (purchaseType.value === 'gst') ? 'block' : 'none';
+  saveDraft();
+};
+gstNo.oninput = ()=> { invoice.gstNo = gstNo.value; saveDraft(); };
+
+/* default product selection for quick add (single consistent binding) */
+defaultProduct.addEventListener('change', (e)=> {
+  const name = e.target.value;
+  if(!name) return;
+  const d = defaultCatalog.find(x=>x.name===name);
+  if(d){
+    itemName.value = d.name;
+    itemUnit.value = d.unit;
+    itemQty.value = 1;
+    itemPrice.value = d.purchase || 0;
+    itemDisc.value = 0;
+    itemTax.value = d.gst || 0;
+    itemCess.value = d.cess || 0;
+    showQuickImage(d.image);
+  }
+});
+
+/* Products list controls */
+clearAllProductsBtn.onclick = ()=> {
+  if(!confirm('Delete ALL products from local storage?')) return;
+  localStorage.removeItem(LS_PRODUCTS);
+  loadProducts();
+  renderProductsList();
+};
+importProductsBtn.onclick = ()=> {
+  const input = document.createElement('input'); input.type='file'; input.accept='application/json';
+  input.onchange = (e)=> {
+    const f = e.target.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = (ev)=> {
+      try{
+        const arr = JSON.parse(ev.target.result);
+        if(!Array.isArray(arr)) throw 'Invalid';
+        localStorage.setItem(LS_PRODUCTS, JSON.stringify(arr.concat(getProducts()).slice(0,500)));
+        renderProductsList();
+        alert('Products imported.');
+      }catch(err){ alert('Invalid JSON file'); }
+    };
+    r.readAsText(f);
+  };
+  input.click();
+};
+openProductsBtn.onclick = ()=> {
+  // show modal with list of all products (reuse productsList)
+  const arr = getProducts();
+  modalTitle.innerText = 'Products';
+  modalSubtitle.innerText = `${arr.length} products (local)`;
+  modalBody.innerHTML = '<div style="max-height:400px;overflow:auto;padding-right:6px">';
+  if(arr.length === 0) modalBody.innerHTML += '<div class="small-muted">No products</div>';
+  arr.forEach((p,idx) => {
+    modalBody.innerHTML += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #f3f7ff">
+      <div><strong>${escapeHtml(p.name)}</strong><div class="small-muted">${escapeHtml(p.sku||'')} • ${escapeHtml(p.category||'')}</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn ghost small" data-load="${idx}">Load</button>
+        <button class="btn ghost small" data-view="${idx}">View</button>
+      </div>
+    </div>`;
+  });
+  modalBody.innerHTML += '</div>';
+  openModal();
+  // attach handlers
+  modalBody.querySelectorAll('button[data-load]').forEach(btn=>{
+    btn.onclick = ()=> {
+      const idx = Number(btn.dataset.load);
+      loadProductToQuickForm(idx);
+      closeModal();
+    };
+  });
+  modalBody.querySelectorAll('button[data-view]').forEach(btn=>{
+    btn.onclick = ()=> {
+      const idx = Number(btn.dataset.view);
+      viewProductModal(idx);
+    };
+  });
+};
+exportAllJsonBtn.onclick = ()=> {
+  const data = JSON.stringify(getProducts(), null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Botronixs_products.json'; a.click();
+  URL.revokeObjectURL(a.href);
+};
+importJsonBtn.onclick = ()=> {
+  const input = document.createElement('input'); input.type='file'; input.accept='application/json';
+  input.onchange = (e)=> {
+    const f = e.target.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = (ev)=> {
+      try{
+        const arr = JSON.parse(ev.target.result);
+        if(!Array.isArray(arr)) throw 'Invalid';
+        // merge
+        const existing = getProducts();
+        localStorage.setItem(LS_PRODUCTS, JSON.stringify(arr.concat(existing).slice(0,500)));
+        renderProductsList();
+        alert('Imported products.');
+      }catch(err){ alert('Invalid JSON file'); }
+    };
+    r.readAsText(f);
+  };
+  input.click();
+};
+
+/* Export / Import invoice list - reuse existing buttons */
+document.getElementById('exportAllJson').addEventListener('click', ()=> exportAllJsonBtn.onclick());
+document.getElementById('importJsonBtn').addEventListener('click', ()=> importJsonBtn.onclick());
+
+/* Auto-save interval */
+setInterval(()=> {
+  saveDraft();
+}, 3000);
+
+/* Initialize */
+(function init(){
+  loadProducts();
+  renderProductsList();
+  loadDraft();
+  renderInvoiceItems();
+  updateTotals();
+})();
+
+/* Keyboard shortcut Ctrl+S to save invoice snapshot */
+document.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); saveInvoice(); }
+});
+</script>
+</body>
+</html>

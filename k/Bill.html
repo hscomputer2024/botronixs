@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Purchase Bill — Modern</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --muted:#7a869a;
+      --accent:#0b6cff;
+      --accent-2:#f59e0b;
+      --success:#10b981;
+      --danger:#ef4444;
+      --glass: rgba(15,23,42,0.03);
+      --shadow: 0 6px 18px rgba(12,40,78,0.08);
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .app {
+      max-width:1200px;
+      margin:28px auto;
+      background:var(--card);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      padding:18px;
+    }
+
+    header.top {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding-bottom:12px;
+      border-bottom:1px solid #eef1f6;
+    }
+    header.top h1{
+      margin:0;
+      font-size:18px;
+      font-weight:600;
+    }
+    header.top .meta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 300px;
+      gap:16px;
+      margin-top:18px;
+    }
+
+    /* Left panel (form) */
+    .form {
+      background:linear-gradient(180deg, rgba(255,255,255,0.6), var(--card));
+      padding:14px;
+      border-radius:8px;
+      box-shadow:0 1px 0 rgba(0,0,0,0.02) inset;
+    }
+    .row{display:flex; gap:10px; margin-bottom:10px; align-items:center;}
+    .row .col {flex:1}
+    label.small {display:block; font-size:12px; color:var(--muted); margin-bottom:6px;}
+    input[type="text"], input[type="number"], select, textarea, input[type="date"]{
+      width:100%;
+      padding:8px 10px;
+      border-radius:6px;
+      border:1px solid #e6e9ef;
+      background:transparent;
+      font-size:14px;
+      outline:none;
+    }
+    textarea{min-height:64px; resize:vertical; padding-top:8px}
+    .inline {
+      display:flex; gap:8px; align-items:center;
+    }
+    .badge {
+      background:var(--glass);
+      padding:6px 10px;
+      border-radius:8px;
+      font-weight:600;
+    }
+
+    /* item entry */
+    .item-entry{
+      margin-top:12px;
+      padding:12px;
+      border-radius:8px;
+      background:#fafbfd;
+      border:1px solid #eef2f8;
+    }
+    .item-entry .controls{display:flex; gap:8px; align-items:end; flex-wrap:wrap}
+    .small-input{width:100px}
+    .tiny{width:72px}
+    .unit{width:84px}
+    .price{width:120px}
+    .add-btn{
+      background:linear-gradient(180deg,var(--accent),#0350e9);
+      color:white; padding:9px 12px; border-radius:8px;
+      border:none; cursor:pointer; font-weight:600;
+      display:inline-flex; gap:8px; align-items:center;
+    }
+    .add-btn:active{transform:translateY(1px);}
+
+    /* table */
+    .items-table {
+      margin-top:12px;
+      border-radius:8px;
+      overflow:hidden;
+      border:1px solid #eaf0ff;
+    }
+    table{width:100%; border-collapse:collapse; font-size:14px}
+    thead th{
+      text-align:left;
+      padding:10px 12px;
+      background:linear-gradient(90deg,#f8fafc,#eef6ff);
+      font-weight:600;
+      color:#0f172a;
+      border-bottom:1px solid #e9eefb;
+    }
+    tbody td{padding:10px 12px; border-bottom:1px solid #f3f6fb; vertical-align:middle}
+    tbody tr:last-child td{border-bottom:0}
+    .muted{color:var(--muted); font-size:13px}
+    .actions button{border:0;background:none;cursor:pointer;padding:6px;border-radius:6px}
+    .actions button:hover{background:#f2f6ff}
+
+    /* right summary */
+    .summary{
+      background:linear-gradient(180deg,#fff,#fbfdff);
+      padding:14px;
+      border-radius:8px;
+      height:100%;
+      border:1px solid #eef3ff;
+      display:flex; flex-direction:column;
+      justify-content:space-between;
+    }
+    .summary .block{margin-bottom:12px}
+    .summary .totals{background:var(--glass); padding:10px; border-radius:8px}
+    .tot-line{display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-weight:600}
+    .tot-big{font-size:20px; color:var(--accent); font-weight:700}
+    .save-actions{display:flex; gap:10px; margin-top:10px}
+    .btn{
+      padding:10px 12px; border-radius:8px; border:1px solid #dbe7ff; background:white; cursor:pointer; font-weight:600;
+    }
+    .btn.primary{background:linear-gradient(180deg,var(--accent),#0350e9); color:white; border:0}
+    footer.foot {margin-top:14px; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--muted)}
+
+    /* responsive */
+    @media (max-width:1000px){
+      .grid{grid-template-columns: 1fr}
+      .right {order:2}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Purchase bill interface">
+    <header class="top">
+      <div>
+        <h1>Purchase Bill</h1>
+        <div class="meta">
+          <div class="badge">A/c Balance: ₹ 0.00</div>
+          <div>Purchase ID: <strong>#PB-0001</strong></div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="muted">User: Admin</div>
+        <div style="font-size:12px;color:var(--muted)">17-November-2025</div>
+      </div>
+    </header>
+
+    <div class="grid" style="margin-top:18px">
+      <section class="form" aria-label="Purchase details form">
+        <!-- top details -->
+        <div class="row">
+          <div class="col">
+            <label class="small">Purchase Type</label>
+            <select id="purchaseType">
+              <option>Non GST</option>
+              <option>GST</option>
+            </select>
+          </div>
+          <div class="col">
+            <label class="small">Supplier</label>
+            <select id="supplier">
+              <option>-- Select Supplier --</option>
+              <option>AMIT PLAZA</option>
+              <option>VENDOR ABC</option>
+              <option>WHOLESALE MART</option>
+            </select>
+          </div>
+          <div style="width:160px">
+            <label class="small">Purchase Date</label>
+            <input type="date" id="purchaseDate" value="">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label class="small">Place of Supply</label>
+            <select id="placeOfSupply">
+              <option>West Bengal</option>
+              <option>Delhi</option>
+              <option>Maharashtra</option>
+            </select>
+          </div>
+          <div style="width:180px">
+            <label class="small">Purchase Bill No.</label>
+            <input type="text" id="billNo" placeholder="Bill number">
+          </div>
+          <div style="width:180px">
+            <label class="small">Due Date</label>
+            <input type="date" id="dueDate" value="">
+          </div>
+        </div>
+
+        <!-- item entry -->
+        <div class="item-entry" aria-label="Item entry">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+            <div style="font-weight:600">Add Item</div>
+            <div class="muted" style="font-size:13px">Press Enter to Add</div>
+          </div>
+
+          <div class="controls" style="margin-bottom:8px">
+            <div style="flex:1; min-width:160px">
+              <label class="small">Barcode</label>
+              <input type="text" id="barcode" placeholder="Scan or enter barcode">
+            </div>
+
+            <div style="flex:2; min-width:220px">
+              <label class="small">Item Name</label>
+              <input list="productList" id="itemName" placeholder="Item name">
+              <datalist id="productList">
+                <!-- js will populate -->
+              </datalist>
+            </div>
+
+            <div style="width:90px">
+              <label class="small">Unit</label>
+              <input type="text" id="unit" value="NOS">
+            </div>
+
+            <div style="width:110px">
+              <label class="small">Quantity</label>
+              <input type="number" id="qty" min="0" value="1">
+            </div>
+
+            <div style="width:140px">
+              <label class="small">Purchase Price (₹)</label>
+              <input type="number" id="price" min="0" step="0.01" value="0.00">
+            </div>
+
+            <div style="width:100px">
+              <label class="small">Disc %</label>
+              <input type="number" id="disc" min="0" max="100" value="0">
+            </div>
+
+            <div style="width:100px">
+              <label class="small">Tax %</label>
+              <input type="number" id="tax" min="0" max="100" value="0">
+            </div>
+
+            <div style="width:100px">
+              <label class="small">Cess %</label>
+              <input type="number" id="cess" min="0" max="100" value="0">
+            </div>
+
+            <div style="width:120px">
+              <label class="small">Amount (₹)</label>
+              <input type="text" id="lineAmount" readonly value="0.00" style="background:#f8fafc; font-weight:600">
+            </div>
+
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="add-btn" id="addItemBtn" title="Add item to the table">➕ Add</button>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center; font-size:13px">
+            <label><input type="checkbox" id="itemTag"> Item Tag</label>
+            <label><input type="checkbox" id="itemCode"> Item Code</label>
+          </div>
+        </div>
+
+        <!-- items table -->
+        <div class="items-table" role="region" aria-label="Items table">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px">#</th>
+                <th>Item Name</th>
+                <th style="width:80px">Qty</th>
+                <th style="width:80px">Unit</th>
+                <th style="width:120px">Price/Unit</th>
+                <th style="width:90px">Disc %</th>
+                <th style="width:90px">Tax %</th>
+                <th style="width:90px">Amount</th>
+                <th style="width:90px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody">
+              <!-- rows here -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- remarks and extras -->
+        <div style="display:flex; gap:12px; margin-top:12px; align-items:flex-start">
+          <div style="flex:1">
+            <label class="small">Remarks (Private)</label>
+            <textarea id="remarks" placeholder="Add notes..."></textarea>
+          </div>
+
+          <div style="width:320px">
+            <label class="small">Shipping / Extra</label>
+            <input type="number" id="shipping" value="0" min="0" step="0.01">
+            <div style="margin-top:8px">
+              <label class="small">TCS</label>
+              <select id="tcs">
+                <option value="0">Select</option>
+                <option value="1">1%</option>
+                <option value="0.1">0.1%</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <aside class="summary" aria-label="Summary & Payment">
+        <div>
+          <div class="block">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <div style="font-weight:700">Payments</div>
+              <div class="muted" style="font-size:13px">Mode</div>
+            </div>
+
+            <div style="display:flex; gap:8px; margin-top:8px">
+              <select id="payMode" style="flex:1">
+                <option>Cash</option>
+                <option>Bank Transfer</option>
+                <option>Credit</option>
+              </select>
+              <input type="text" id="txnId" placeholder="Txn ID / Ref" style="width:140px">
+            </div>
+
+            <div style="display:flex; gap:8px; margin-top:8px; align-items:center">
+              <input type="number" id="payAmount" placeholder="Amount" min="0" step="0.01" style="flex:1">
+              <div class="muted" style="width:80px; text-align:right">Balance</div>
+              <div id="balanceView" style="width:120px; text-align:right; font-weight:700">₹ 0.00</div>
+            </div>
+          </div>
+
+          <div class="block totals" style="margin-top:10px">
+            <div class="tot-line"><div class="muted">Sub Total</div><div id="subTotal">₹ 0.00</div></div>
+            <div class="tot-line"><div class="muted">Total Discount</div><div id="totalDisc">₹ 0.00</div></div>
+            <div class="tot-line"><div class="muted">Total Tax</div><div id="totalTax">₹ 0.00</div></div>
+            <div class="tot-line"><div class="muted">Cess</div><div id="totalCess">₹ 0.00</div></div>
+            <div class="tot-line"><div class="muted">Shipping</div><div id="shippingView">₹ 0.00</div></div>
+            <hr style="border:none;border-top:1px dashed #e6eefb;margin:8px 0">
+            <div class="tot-line" style="font-size:16px"><div>Total Amount</div><div class="tot-big" id="grandTotal">₹ 0.00</div></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="save-actions">
+            <button class="btn" id="saveDraft">Save</button>
+            <button class="btn primary" id="savePrint">Save & Print</button>
+          </div>
+          <footer class="foot">
+            <div>Items: <strong id="itemsCount">0</strong></div>
+            
+          </footer>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // sample products for the datalist and quick autofill
+    const products = [
+      {name:'Mobile Charger', barcode:'890123450001', price:350, unit:'NOS'},
+      {name:'USB Cable 1m', barcode:'890123450002', price:120, unit:'NOS'},
+      {name:'Laptop Stand', barcode:'890123450003', price:950, unit:'PCS'},
+      {name:'Wireless Mouse', barcode:'890123450004', price:450, unit:'PCS'},
+      {name:'Keyboard', barcode:'890123450005', price:700, unit:'PCS'}
+    ];
+
+    // populate datalist
+    const productList = document.getElementById('productList');
+    products.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      productList.appendChild(opt);
+    });
+
+    // set current date as default
+    const todayIso = new Date().toISOString().substring(0,10);
+    document.getElementById('purchaseDate').value = todayIso;
+    document.getElementById('dueDate').value = todayIso;
+
+    // form elements
+    const qtyEl = document.getElementById('qty');
+    const priceEl = document.getElementById('price');
+    const discEl = document.getElementById('disc');
+    const taxEl = document.getElementById('tax');
+    const cessEl = document.getElementById('cess');
+    const lineAmtEl = document.getElementById('lineAmount');
+    const addBtn = document.getElementById('addItemBtn');
+    const itemsBody = document.getElementById('itemsBody');
+    const itemsCountEl = document.getElementById('itemsCount');
+    const subTotalEl = document.getElementById('subTotal');
+    const totalDiscEl = document.getElementById('totalDisc');
+    const totalTaxEl = document.getElementById('totalTax');
+    const totalCessEl = document.getElementById('totalCess');
+    const shippingEl = document.getElementById('shipping');
+    const shippingView = document.getElementById('shippingView');
+    const grandTotalEl = document.getElementById('grandTotal');
+    const payAmountEl = document.getElementById('payAmount');
+    const balanceView = document.getElementById('balanceView');
+
+    // state
+    let items = [];
+
+    // helpers
+    function toCurrency(n){ return '₹ ' + Number(n || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}); }
+    function parseNum(v){ v = Number(v); return isNaN(v)?0:v; }
+
+    function recalcLine(){
+      const q = parseNum(qtyEl.value);
+      const price = parseNum(priceEl.value);
+      const disc = parseNum(discEl.value);
+      const tax = parseNum(taxEl.value);
+      const cess = parseNum(cessEl.value);
+
+      // net after discount
+      const gross = q * price+20;
+      const discountAmount = gross * (disc/100);
+      const afterDisc = gross - discountAmount;
+      const taxAmount = afterDisc * (tax/100);
+      const cessAmount = afterDisc * (cess/100);
+      const final = afterDisc + taxAmount + cessAmount;
+
+      lineAmtEl.value = final.toFixed(2);
+    }
+
+    // recalc totals
+    function recalcTotals(){
+      let sub = 0, totalDisc=0, totalTax=0, totalCess=0;
+      items.forEach(it=>{
+        sub += it.qty * it.price;
+        totalDisc += it.discountAmount;
+        totalTax += it.taxAmount;
+        totalCess += it.cessAmount;
+      });
+      const shipping = parseNum(shippingEl.value);
+      const tcs = parseNum(document.getElementById('tcs').value);
+      let grand = (sub - totalDisc) + totalTax + totalCess + shipping;
+      // apply TCS on grand if selected (simple multiply)
+      if(tcs>0){ grand += grand * (tcs/100); }
+
+      subTotalEl.textContent = toCurrency(sub);
+      totalDiscEl.textContent = toCurrency(totalDisc);
+      totalTaxEl.textContent = toCurrency(totalTax);
+      totalCessEl.textContent = toCurrency(totalCess);
+      shippingView.textContent = toCurrency(shipping);
+      grandTotalEl.textContent = toCurrency(grand);
+
+      itemsCountEl.textContent = items.length;
+      updateBalance();
+    }
+
+    function updateBalance(){
+      const paid = parseNum(payAmountEl.value);
+      const grandVal = Number(grandTotalEl.textContent.replace(/[₹, ]/g,'') || 0);
+      const balance = Math.max(0, grandVal - paid);
+      balanceView.textContent = toCurrency(balance);
+    }
+
+    // build row
+    function renderItems(){
+      itemsBody.innerHTML = '';
+      items.forEach((it, idx) => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+          <td>${idx+1}</td>
+          <td>
+            <div style="font-weight:600">${escapeHtml(it.name)}</div>
+            <div class="muted" style="font-size:12px">${escapeHtml(it.barcode||'')}</div>
+          </td>
+          <td style="text-align:center">${it.qty}</td>
+          <td style="text-align:center">${escapeHtml(it.unit)}</td>
+          <td style="text-align:right">${toCurrency(it.price)}</td>
+          <td style="text-align:right">${it.disc}%</td>
+          <td style="text-align:right">${it.tax}%</td>
+          <td style="text-align:right">${toCurrency(it.amount)}</td>
+          <td class="actions" style="text-align:center">
+            <button title="Edit" data-idx="${idx}" class="edit">✏️</button>
+            <button title="Delete" data-idx="${idx}" class="del">🗑️</button>
+          </td>
+        `;
+
+        itemsBody.appendChild(tr);
+      });
+
+      // attach handlers
+      document.querySelectorAll('.edit').forEach(b=>{
+        b.addEventListener('click', e=>{
+          const idx = Number(e.currentTarget.dataset.idx);
+          loadItemIntoEntry(idx);
+        });
+      });
+      document.querySelectorAll('.del').forEach(b=>{
+        b.addEventListener('click', e=>{
+          const idx = Number(e.currentTarget.dataset.idx);
+          if(confirm('Delete this item?')) {
+            items.splice(idx,1);
+            renderItems();
+            recalcTotals();
+          }
+        });
+      });
+
+      recalcTotals();
+    }
+
+    // copy an item into the entry fields for editing
+    function loadItemIntoEntry(idx){
+      const it = items[idx];
+      if(!it) return;
+      document.getElementById('barcode').value = it.barcode || '';
+      document.getElementById('itemName').value = it.name;
+      document.getElementById('unit').value = it.unit;
+      qtyEl.value = it.qty;
+      priceEl.value = it.price;
+      discEl.value = it.disc;
+      taxEl.value = it.tax;
+      cessEl.value = it.cess;
+      lineAmtEl.value = it.amount.toFixed(2);
+
+      // remove original to avoid duplicates on submit (we will re-add)
+      items.splice(idx,1);
+      renderItems();
+    }
+
+    // add item button handler
+    addBtn.addEventListener('click', addItemFromEntry);
+    // allow Enter key on last field to add
+    [document.getElementById('itemName'), qtyEl, priceEl, discEl, taxEl, cessEl].forEach(el=>{
+      el.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){ e.preventDefault(); addItemFromEntry(); }
+      });
+    });
+
+    function addItemFromEntry(){
+      const name = document.getElementById('itemName').value.trim();
+      if(!name){ alert('Please enter item name'); document.getElementById('itemName').focus(); return; }
+      const barcode = document.getElementById('barcode').value.trim();
+      const unit = document.getElementById('unit').value || 'NOS';
+      const qty = parseNum(qtyEl.value);
+      const price = parseNum(priceEl.value);
+      const disc = parseNum(discEl.value);
+      const tax = parseNum(taxEl.value);
+      const cess = parseNum(cessEl.value);
+
+      const gross = qty * price;
+      const discountAmount = gross * (disc/100);
+      const afterDisc = gross - discountAmount;
+      const taxAmount = afterDisc * (tax/100);
+      const cessAmount = afterDisc * (cess/100);
+      const final = afterDisc + taxAmount + cessAmount;
+
+      const newItem = {
+        name, barcode, unit, qty, price, disc, tax, cess,
+        amount: Number(final.toFixed(2)),
+        discountAmount, taxAmount, cessAmount
+      };
+
+      items.push(newItem);
+      clearEntry();
+      renderItems();
+    }
+
+    function clearEntry(){
+      document.getElementById('barcode').value='';
+      document.getElementById('itemName').value='';
+      document.getElementById('unit').value='NOS';
+      qtyEl.value=1; priceEl.value='0.00'; discEl.value=0; taxEl.value=0; cessEl.value=0;
+      lineAmtEl.value='0.00';
+      document.getElementById('itemName').focus();
+    }
+
+    // recalc line live
+    [qtyEl, priceEl, discEl, taxEl, cessEl].forEach(el=> el.addEventListener('input', recalcLine));
+
+    // sample barcode quick-fill
+    document.getElementById('barcode').addEventListener('change', function(){
+      const v = this.value.trim();
+      if(!v) return;
+      const found = products.find(p => p.barcode === v || p.name.toLowerCase() === v.toLowerCase());
+      if(found){
+        document.getElementById('itemName').value = found.name;
+        document.getElementById('price').value = found.price;
+        document.getElementById('unit').value = found.unit;
+        recalcLine();
+      }
+    });
+
+    // when item name matches product, autofill price/unit
+    document.getElementById('itemName').addEventListener('change', function(){
+      const v = this.value.trim();
+      const found = products.find(p => p.name.toLowerCase() === v.toLowerCase());
+      if(found){
+        document.getElementById('price').value = found.price;
+        document.getElementById('unit').value = found.unit;
+        document.getElementById('barcode').value = found.barcode || '';
+        recalcLine();
+      }
+    });
+
+    // shipping, tcs etc changes
+    [shippingEl, document.getElementById('tcs')].forEach(el => el.addEventListener('input', recalcTotals));
+    payAmountEl.addEventListener('input', updateBalance);
+
+    // save buttons (demo)
+    document.getElementById('saveDraft').addEventListener('click', ()=> {
+      alert('Saved (demo). JSON printed to console.');
+      console.log('Saved bill:', gatherBillData());
+    });
+    document.getElementById('savePrint').addEventListener('click', ()=> {
+      alert('Saved & Print (demo). JSON printed to console.');
+      console.log('Saved bill:', gatherBillData());
+      // simple print
+      window.print();
+    });
+
+    function gatherBillData(){
+      return {
+        meta: {
+          purchaseType: document.getElementById('purchaseType').value,
+          supplier: document.getElementById('supplier').value,
+          purchaseDate: document.getElementById('purchaseDate').value,
+          billNo: document.getElementById('billNo').value,
+          placeOfSupply: document.getElementById('placeOfSupply').value
+        },
+        items,
+        totals: {
+          subTotal: parseNum(subTotalEl.textContent.replace(/[₹, ]/g,'')),
+          totalDisc: parseNum(totalDiscEl.textContent.replace(/[₹, ]/g,'')),
+          totalTax: parseNum(totalTaxEl.textContent.replace(/[₹, ]/g,'')),
+          totalCess: parseNum(totalCessEl.textContent.replace(/[₹, ]/g,'')),
+          shipping: parseNum(shippingEl.value),
+          grandTotal: parseNum(grandTotalEl.textContent.replace(/[₹, ]/g,''))
+        },
+        payments: {
+          mode: document.getElementById('payMode').value,
+          txnId: document.getElementById('txnId').value,
+          paid: parseNum(payAmountEl.value)
+        },
+        remarks: document.getElementById('remarks').value
+      };
+    }
+
+    // escape html helper for table
+    function escapeHtml(unsafe) {
+      return String(unsafe || '').replace(/[&<"']/g, function(m) {
+        return {'&':'&amp;','<':'&lt;','"':'&quot;',"'":'&#039;'}[m];
+      });
+    }
+
+    // init
+    clearEntry();
+    renderItems();
+  </script>
+</body>
+</html>

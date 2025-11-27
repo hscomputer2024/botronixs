@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Premium Admin Dashboard — Black Gold</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+:root{--gold:#d4af37;--bg:#0b0b0c;--card:#0f1113;--muted:#bfb8a1;}
+*{box-sizing:border-box}
+html,body{height:100%;}
+body{margin:0;font-family:Poppins,system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:linear-gradient(180deg,#050506,#0b0b0c);color:var(--muted);min-height:100vh}
+.sidebar{width:260px;position:fixed;top:0;left:0;bottom:0;background:linear-gradient(180deg,#070708,#0f1113);border-right:3px solid rgba(212,175,55,0.12);padding:28px;display:flex;flex-direction:column}
+.brand{color:var(--gold);font-weight:800;font-size:20px;margin-bottom:18px}
+.nav a{display:block;color:#d9d6c9;padding:12px 10px;border-radius:10px;text-decoration:none;margin-bottom:8px}
+.nav a.active{background:rgba(212,175,55,0.08);color:var(--gold);}
+.content{margin-left:280px;padding:28px;max-height:100vh;overflow:auto;padding-bottom:40px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.page-title{color:var(--gold);font-weight:700;font-size:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(212,175,55,0.06);padding:20px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+.card h3{color:var(--gold);margin:0 0 8px 0}
+.form-grid{display:flex;flex-wrap:wrap;gap:12px}
+.w-1{flex:1 1 100%}
+.w-2{flex:1 1 calc(50% - 12px)}
+.w-3{flex:1 1 calc(33% - 12px)}
+label{display:block;color:#e9e6d8;font-size:13px;margin-bottom:6px}
+input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(212,175,55,0.12);background:transparent;color:var(--muted)}
+.btn{background:var(--gold);color:#0b0b0c;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+.btn.ghost{background:transparent;border:1px solid rgba(212,175,55,0.14);color:var(--gold)}
+table{width:100%;border-collapse:collapse;margin-top:12px;color:#e9e6d8}
+th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left}
+th{color:var(--gold)}
+.actions button{margin-right:6px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:40}
+.modal{background:linear-gradient(180deg,#0a0a0b,#121213);padding:18px;border-radius:12px;max-width:920px;width:100%;border:1px solid rgba(212,175,55,0.08);display:flex;flex-direction:column;max-height:90vh;overflow:hidden}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.close{background:transparent;border:1px solid rgba(212,175,55,0.12);color:var(--gold);padding:6px 8px;border-radius:8px;cursor:pointer}
+.modal-body{overflow-y:auto;max-height:72vh;padding-right:10px;padding-bottom:6px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding-top:8px;border-top:1px solid rgba(255,255,255,0.02);background:linear-gradient(180deg,transparent,rgba(0,0,0,0.02))}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:10px}
+::-webkit-scrollbar-track{background:#111}
+@media (max-width:900px){ .sidebar{position:relative;width:100%;height:auto} .content{margin-left:0} .form-grid .w-2,.form-grid .w-3{flex:1 1 100%} }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">Botronixs Admin</div>
+  <nav class="nav">
+    <a class="active" data-page="dashboard">Dashboard</a>
+    <a data-page="add-product">Add Product</a>
+    <a data-page="bill">Bill Generate</a>
+  </nav>
+  <div style="margin-top:auto;color:#a99f7a;font-size:13px">Black · Gold — Matte</div>
+</aside>
+
+<main class="content">
+  <div class="topbar">
+    <div class="page-title">Admin • Black-Gold Dashboard</div>
+    <div>
+      <button class="btn" id="exportCsv">Export Products CSV</button>
+      <button class="btn ghost" id="exportBillCsv">Export Bill CSV</button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <section id="dashboard" class="card-grid">
+    <div class="grid" id="homeGrid">
+      <div class="card" data-open="add-product"><h3>➕ Add Product</h3><div style="color:#cfc8a6">Create and manage inventory</div></div>
+      <div class="card" data-open="bill"><h3>🧾 Bill Generate</h3><div style="color:#cfc8a6">Quick billing system</div></div>
+    </div>
+  </section>
+
+  <!-- Add Product -->
+  <section id="add-product" style="display:none">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3>Add Product</h3>
+        <div>
+          <button class="btn ghost" id="loadSaved">Load Saved</button>
+          <button class="btn" id="openAddModal">New Product</button>
+        </div>
+      </div>
+      <div style="overflow:auto">
+        <table id="productsTable">
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Category</th><th>Price</th><th>Qty</th>
+              <th>Brand</th><th>Model</th><th>CGST</th><th>SGST</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bill Generate -->
+  <section id="bill" style="display:none">
+    <div class="card">
+      <h3>Bill Generate</h3>
+
+      <!-- Buyer Info -->
+      <div class="form-grid" style="margin-bottom:10px;gap:12px">
+        <div class="w-2"><label>Ref. No.</label><input id="bill_ref" readonly /></div>
+        <div class="w-2"><label>Buyer Name</label><input id="buyer_name" /></div>
+        <div class="w-2"><label>Contact No.</label><input id="buyer_contact" /></div>
+        <div class="w-2"><label>Address</label><input id="buyer_address" /></div>
+        <div class="w-2"><label>Company GST No.</label><input id="company_gst" /></div>
+        <div class="w-2"><label>Buyer GST No.</label><input id="buyer_gst" /></div>
+      </div>
+
+      <!-- Product Selection -->
+      <div class="form-grid" style="margin-bottom:10px;gap:12px">
+        <div class="w-2">
+          <label>Product Category</label>
+          <select id="bill_category"><option>Electronics</option><option>Electrical</option></select>
+        </div>
+        <div class="w-2">
+          <label>Product Name</label>
+          <select id="bill_product"><option value="">--Select--</option></select>
+        </div>
+        <div class="w-2"><label>MRP Price</label><input id="bill_price" type="number" /></div>
+        <div class="w-2"><label>Discount (%)</label><input id="bill_discount" type="number" value="0" /></div>
+        <div class="w-2"><label>Total Price</label><input id="bill_total" readonly /></div>
+        <div class="w-2"><label>Available Qty</label><input id="bill_avail_qty" readonly /></div>
+        <div class="w-2"><label>QTY</label><input id="bill_qty" type="number" min="1" value="1" /></div>
+      </div>
+
+      <button class="btn" id="addBillItem">ADD</button>
+
+      <!-- Bill Table -->
+      <div style="overflow:auto;margin-top:20px">
+        <table id="billTable">
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Category</th><th>MRP</th><th>Discount</th><th>QTY</th><th>Total</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Totals -->
+      <div style="margin-top:10px">
+        <div class="form-grid" style="gap:12px">
+          <div class="w-2"><label>Total Price</label><input id="bill_sum" readonly /></div>
+          <div class="w-2"><label>CGST 9%</label><input id="bill_cgst" readonly /></div>
+          <div class="w-2"><label>SGST 9%</label><input id="bill_sgst" readonly /></div>
+          <div class="w-2"><label>Gross Pay</label><input id="bill_gross" readonly /></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Product Modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div style="color:var(--gold);font-weight:800" id="modalTitle">New Product</div>
+      <div><button class="close" id="closeModal">Close</button></div>
+    </div>
+    <div class="modal-body">
+      <form id="productForm" class="form-grid">
+        <div class="w-2"><label>Category</label><select id="p_category"><option>Electronics</option><option>Electrical</option></select></div>
+        <div class="w-2"><label>Product Name</label><input id="p_name" placeholder="Type product name" /></div>
+        <div class="w-2"><label>Seller Name</label><input id="p_seller" /></div>
+        <div class="w-2"><label>Available Qty</label><input id="p_qty" type="number" min="0" /></div>
+        <div class="w-2"><label>Cost Price</label><input id="p_cost" type="number" step="0.01" /></div>
+        <div class="w-2"><label>Cost GST (18%)</label><input id="p_costgst" type="number" step="0.01" /></div>
+        <div class="w-2"><label>Profit %</label><input id="p_profit" type="number" value="30" /></div>
+        <div class="w-2"><label>Selling Price</label><input id="p_sell" type="number" step="0.01" readonly /></div>
+        <div class="w-2"><label>CGST (9%)</label><input id="p_cgst" type="number" step="0.01" readonly /></div>
+        <div class="w-2"><label>SGST (9%)</label><input id="p_sgst" type="number" step="0.01" readonly /></div>
+        <div class="w-2"><label>Rack No.</label><input id="p_rack" /></div>
+        <div class="w-2"><label>Model No.</label><input id="p_model" /></div>
+        <div class="w-2"><label>Brand Name</label><input id="p_brand" /></div>
+        <div class="w-2"><label>Warranty</label><input id="p_warranty" /></div>
+        <div class="w-2"><label>Returnable</label><select id="p_return"><option>Yes</option><option>No</option></select></div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn ghost" id="resetForm">Reset</button>
+      <button type="button" class="btn" id="saveProductBtn">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== NAVIGATION ===================
+document.querySelectorAll('.nav a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    document.querySelectorAll('main section').forEach(sec=>sec.style.display='none');
+    document.getElementById(a.dataset.page).style.display='block';
+    document.querySelectorAll('.nav a').forEach(n=>n.classList.remove('active'));
+    a.classList.add('active');
+  });
+});
+
+// =================== PRODUCTS ===================
+let products = [];
+let currentEditIndex = null;
+
+// Modal
+const modalBackdrop = document.getElementById('modalBackdrop');
+document.getElementById('openAddModal').addEventListener('click',()=>{
+  modalBackdrop.style.display='flex';
+  document.getElementById('productForm').reset();
+  currentEditIndex=null;
+});
+document.getElementById('closeModal').addEventListener('click',()=>{ modalBackdrop.style.display='none'; });
+
+// Calculate selling price
+const cost=document.getElementById('p_cost');
+const costGst=document.getElementById('p_costgst');
+const profit=document.getElementById('p_profit');
+const sell=document.getElementById('p_sell');
+const cgst=document.getElementById('p_cgst');
+const sgst=document.getElementById('p_sgst');
+function calculatePrice(){
+  const c=parseFloat(cost.value)||0;
+  const gst=parseFloat(costGst.value)||0;
+  const pf=parseFloat(profit.value)||0;
+  const base=c+gst;
+  const finalPrice=base+(base*pf/100);
+  sell.value=finalPrice.toFixed(2);
+  cgst.value=(finalPrice*0.09).toFixed(2);
+  sgst.value=(finalPrice*0.09).toFixed(2);
+}
+[cost,costGst,profit].forEach(el=>el.addEventListener('input', calculatePrice));
+
+// Save Product
+document.getElementById('saveProductBtn').addEventListener('click',()=>{
+  const f=document.getElementById('productForm');
+  const p={
+    name:f.p_name.value,
+    category:f.p_category.value,
+    seller:f.p_seller.value,
+    qty:parseInt(f.p_qty.value)||0,
+    price:parseFloat(f.p_sell.value)||0,
+    cgst:parseFloat(f.p_cgst.value)||0,
+    sgst:parseFloat(f.p_sgst.value)||0,
+    brand:f.p_brand.value,
+    model:f.p_model.value,
+    rack:f.p_rack.value,
+    warranty:f.p_warranty.value,
+    returnable:f.p_return.value
+  };
+  if(currentEditIndex!==null) products[currentEditIndex]=p;
+  else products.push(p);
+  updateProductTable();
+  modalBackdrop.style.display='none';
+  currentEditIndex=null;
+  f.reset();
+  populateProductsDropdown();
+});
+
+function updateProductTable(){
+  const tbody=document.querySelector('#productsTable tbody');
+  tbody.innerHTML='';
+  products.forEach((p,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${p.name}</td><td>${p.category}</td><td>${p.price}</td><td>${p.qty}</td>
+    <td>${p.brand}</td><td>${p.model}</td><td>${p.cgst}</td><td>${p.sgst}</td>
+    <td class="actions">
+      <button class="btn ghost" onclick="editProduct(${i})">Edit</button>
+      <button class="btn ghost" onclick="deleteProduct(${i})">Delete</button>
+    </td>`;
+    tbody.appendChild(tr);
+  });
+}
+function editProduct(i){
+  const f=document.getElementById('productForm'); const p=products[i];
+  f.p_name.value=p.name; f.p_category.value=p.category; f.p_seller.value=p.seller;
+  f.p_qty.value=p.qty; f.p_sell.value=p.price; f.p_cgst.value=p.cgst; f.p_sgst.value=p.sgst;
+  f.p_brand.value=p.brand; f.p_model.value=p.model; f.p_rack.value=p.rack; f.p_warranty.value=p.warranty;
+  f.p_return.value=p.returnable; currentEditIndex=i;
+  modalBackdrop.style.display='flex';
+}
+function deleteProduct(i){ if(confirm('Delete this product?')){ products.splice(i,1); updateProductTable(); populateProductsDropdown(); } }
+
+// Export CSV
+document.getElementById('exportCsv').addEventListener('click',()=>{
+  if(products.length===0){ alert('No products'); return; }
+  const headers=['Name','Category','Seller','Qty','Price','CGST','SGST','Brand','Model','Rack','Warranty','Returnable'];
+  const rows=products.map(p=>[p.name,p.category,p.seller,p.qty,p.price,p.cgst,p.sgst,p.brand,p.model,p.rack,p.warranty,p.returnable]);
+  let csv=[headers.join(',')]; rows.forEach(r=>csv.push(r.map(c=>'"'+c+'"').join(',')));
+  const blob=new Blob([csv.join('\n')],{type:'text/csv'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='products.csv'; a.click();
+});
+
+// =================== BILL ===================
+let billItems=[]; let billRef=1001;
+document.getElementById('bill_ref').value=billRef;
+
+function populateProductsDropdown(){
+  const category=document.getElementById('bill_category').value;
+  const select=document.getElementById('bill_product');
+  select.innerHTML='<option value="">--Select--</option>';
+  products.forEach((p,i)=>{ if(p.category===category) select.innerHTML+=`<option value="${i}">${p.name}</option>`; });
+}
+
+function resetBillProductFields(){
+  document.getElementById('bill_price').value=''; document.getElementById('bill_avail_qty').value='';
+  document.getElementById('bill_qty').value=1; document.getElementById('bill_discount').value=0;
+  document.getElementById('bill_total').value='';
+}
+
+function calculateBillTotal(){
+  const price=parseFloat(document.getElementById('bill_price').value)||0;
+  const qty=parseInt(document.getElementById('bill_qty').value)||0;
+  const disc=parseFloat(document.getElementById('bill_discount').value)||0;
+  const total=qty*price*(1-disc/100);
+  document.getElementById('bill_total').value=total.toFixed(2);
+}
+
+document.getElementById('bill_category').addEventListener('change',()=>{
+  populateProductsDropdown(); resetBillProductFields();
+});
+document.getElementById('bill_product').addEventListener('change',()=>{
+  const idx=document.getElementById('bill_product').value;
+  if(idx===''){ resetBillProductFields(); return; }
+  const p=products[idx];
+  document.getElementById('bill_price').value=p.price;
+  document.getElementById('bill_avail_qty').value=p.qty;
+  document.getElementById('bill_qty').value=1;
+  calculateBillTotal();
+});
+['bill_qty','bill_discount','bill_price'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calculateBillTotal);
+});
+
+document.getElementById('addBillItem').addEventListener('click',()=>{
+  const idx=document.getElementById('bill_product').value; if(idx===''){ alert('Select product'); return; }
+  const p=products[idx]; const qty=parseInt(document.getElementById('bill_qty').value)||0;
+  if(qty>p.qty){ alert('Quantity exceeds available'); return; }
+  const disc=parseFloat(document.getElementById('bill_discount').value)||0;
+  const total=qty*p.price*(1-disc/100);
+  billItems.push({name:p.name,category:p.category,price:p.price,qty,discount:disc,total});
+  p.qty-=qty; updateBillTable(); populateProductsDropdown(); resetBillProductFields();
+});
+
+function updateBillTable(){
+  const tbody=document.querySelector('#billTable tbody'); tbody.innerHTML='';
+  billItems.forEach((item,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${item.name}</td><td>${item.category}</td><td>${item.price}</td>
+    <td>${item.discount}%</td><td>${item.qty}</td><td>${item.total.toFixed(2)}</td>
+    <td><button class="btn ghost" onclick="deleteBillItem(${i})">Delete</button></td>`;
+    tbody.appendChild(tr);
+  });
+  const sum=billItems.reduce((a,b)=>a+b.total,0);
+  const cgst=sum*0.09; const sgst=sum*0.09; const gross=sum+cgst+sgst;
+  document.getElementById('bill_sum').value=sum.toFixed(2);
+  document.getElementById('bill_cgst').value=cgst.toFixed(2);
+  document.getElementById('bill_sgst').value=sgst.toFixed(2);
+  document.getElementById('bill_gross').value=gross.toFixed(2);
+}
+
+function deleteBillItem(i){
+  const item=billItems[i]; const p=products.find(x=>x.name===item.name && x.category===item.category);
+  if(p) p.qty+=item.qty; billItems.splice(i,1); updateBillTable(); populateProductsDropdown();
+}
+
+document.getElementById('exportBillCsv').addEventListener('click',()=>{
+  if(billItems.length===0){ alert('No items'); return; }
+  const headers=['Name','Category','Price','Discount','Qty','Total'];
+  const rows=billItems.map(b=>[b.name,b.category,b.price,b.discount,b.qty,b.total]);
+  let csv=[headers.join(',')]; rows.forEach(r=>csv.push(r.map(c=>'"'+c+'"').join(',')));
+  const blob=new Blob([csv.join('\n')],{type:'text/csv'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='bill.csv'; a.click();
+});
+
+// Initial populate
+populateProductsDropdown();
+</script>
+
+</body>
+</html>
