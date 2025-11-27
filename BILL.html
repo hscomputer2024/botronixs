@@ -67,7 +67,7 @@
         <div class="logo">B</div>
         <div>
           <div class="title">Botronixs — Billing & Products</div>
-          <div class="muted-small"></div>
+          <div class="muted-small">Email: botronixsiitkgp@gmail.com Contact: 7384392236</div>
         </div>
       </div>
 
@@ -191,7 +191,7 @@
                   <div style="display:flex;justify-content:space-between"><div class="small-muted">Subtotal</div><div id="subtotal">₹0</div></div>
                   <div style="display:flex;justify-content:space-between"><div class="small-muted">Discount</div><div id="discVal">₹0</div></div>
                   <div style="display:flex;justify-content:space-between"><div class="small-muted">Tax (<span id="taxPctLabel">0</span>%)</div><div id="taxVal">₹0</div></div>
-                  <div style="display:flex;justify-content:space-between"><div class="small-muted">Cess</div><div id="cessVal">₹0</div></div>
+                  <!--<div style="display:flex;justify-content:space-between"><div class="small-muted">Cess</div><div id="cessVal">₹0</div></div>-->
                   <div style="border-top:1px dashed #eef4ff;padding-top:10px;margin-top:6px;display:flex;justify-content:space-between"><div style="font-weight:800">Total</div><div id="grandTotal" style="font-weight:800">₹0</div></div>
                   <div style="display:flex;gap:8px;margin-top:10px">
                     <button id="markPaid" class="btn small">Mark Paid</button>
@@ -305,7 +305,9 @@
 
 <script>
 /* ============================
-   Botronixs - Completed single-file JS
+   Botronixs - Full updated single-file JS
+   Fixes: consistent sync + totals, immediate handlers for globalTax/globalDisc,
+   ensure print/PDF/exports use latest invoice state.
    ============================ */
 
 /* Default product catalog (arduino, raspberry pi, breadboard) */
@@ -404,7 +406,7 @@ invoiceDate.value = new Date().toISOString().slice(0,10);
 
 /* Utility functions */
 function escapeHtml(s){ if(s === undefined || s === null) return ''; return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[m]); }
-function formatCurrency(n){ return '₹' + (Number(n) || 0).toLocaleString('en-IN'); }
+function formatCurrency(n){ return '₹' + (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function round2(n){ return Math.round((Number(n)||0) * 100) / 100; }
 
 /* Load products from localStorage or seed with defaults if none exist */
@@ -472,7 +474,6 @@ function renderProductsList(){
   productsList.querySelectorAll('button[data-del]').forEach(btn=>{
     btn.onclick = ()=> {
       const idx = Number(btn.dataset.del);
-      // Option 1: Simple delete
       if(!confirm('Delete this product?')) return;
       const arr = getProducts();
       arr.splice(idx,1);
@@ -648,10 +649,46 @@ function lineTotal(item){
   return round2(taxable + tax + cess);
 }
 
-/* Totals */
+/* ---------- CONSISTENT SYNC + TOTALS (Replaces previous inconsistent versions) ---------- */
+
+/* Ensure UI values are synced into invoice object (normalizes numeric fields) */
+function syncUIToInvoice(){
+  invoice.meta.invoiceNo = invoiceNo.value || invoice.meta.invoiceNo;
+  invoice.meta.date = invoiceDate.value || invoice.meta.date;
+  invoice.meta.due = dueDate.value || invoice.meta.due;
+  invoice.meta.company = companyName.value || invoice.meta.company;
+  invoice.customer.name = custName.value || '';
+  invoice.customer.phone = custPhone.value || '';
+  invoice.customer.email = custEmail.value || '';
+  invoice.customer.address = custAddress.value || '';
+  invoice.globalTax = Number(globalTax.value) || 0;
+  invoice.globalDisc = Number(globalDisc.value) || 0;
+  invoice.notes = invoiceNotes.value || '';
+  invoice.status = invoiceStatus.value || invoice.status;
+  invoice.purchaseType = purchaseType.value || invoice.purchaseType;
+  invoice.gstNo = gstNo.value || invoice.gstNo;
+
+  // normalize items numeric fields (defensive)
+  invoice.items = invoice.items.map(it => ({
+    id: it.id,
+    name: it.name || '',
+    desc: it.desc || '',
+    unit: it.unit || 'NOS',
+    qty: Number(it.qty) || 0,
+    price: Number(it.price) || 0,
+    discPct: Number(it.discPct) || 0,
+    taxPct: Number(it.taxPct) || 0,
+    cessPct: Number(it.cessPct) || 0
+  }));
+}
+
+/* Calculation: uses synced invoice object so all sections match */
 function updateTotals(){
+  // make sure we are using latest UI values
+  syncUIToInvoice();
+
   // Subtotal (sum of base prices before item-level discounts)
-  const subtotal = invoice.items.reduce((s,it)=> s + ((Number(it.qty)||0) * (Number(it.price)||0)), 0);
+  const subtotal = invoice.items.reduce((s,it)=> s + ((Number(it.qty)||0) * (lineTotal(it)||0)), 0);
 
   // Line totals include item-level taxes and cess and item-level discount
   const lineTotals = invoice.items.reduce((s,it)=> s + lineTotal(it), 0);
@@ -669,41 +706,28 @@ function updateTotals(){
   const afterDisc = Math.max(0, lineTotals - globalDiscVal);
 
   // Global tax is applied after discounts on the remaining amount
-  const globalTaxVal = afterDisc * (taxPct/100);
+  const globalTaxVal = round2(afterDisc * (taxPct/100));
 
   // Grand total = amount after discounts (including item tax & cess) + global tax
   const grand = round2(afterDisc + globalTaxVal);
 
-  // Update UI
+  // Update UI (use round2 where appropriate)
   subtotalEl.innerText = formatCurrency(round2(subtotal));
   discValEl.innerText = formatCurrency(round2(globalDiscVal));
   taxValEl.innerText = formatCurrency(round2(globalTaxVal));
-  cessValEl.innerText = formatCurrency(round2(totalCessFromItems));
+  //cessValEl.innerText = formatCurrency(round2(totalCessFromItems));
   grandTotalEl.innerText = formatCurrency(grand);
   taxPctLabel.innerText = taxPct;
 }
 
-/* Sync UI fields into invoice object before saving/printing/exporting */
-function syncUIToInvoice(){
-  invoice.meta.invoiceNo = invoiceNo.value || invoice.meta.invoiceNo;
-  invoice.meta.date = invoiceDate.value || invoice.meta.date;
-  invoice.meta.due = dueDate.value || invoice.meta.due;
-  invoice.meta.company = companyName.value || invoice.meta.company;
-  invoice.customer.name = custName.value || '';
-  invoice.customer.phone = custPhone.value || '';
-  invoice.customer.email = custEmail.value || '';
-  invoice.customer.address = custAddress.value || '';
-  invoice.globalTax = Number(globalTax.value) || 0;
-  invoice.globalDisc = Number(globalDisc.value) || 0;
-  invoice.notes = invoiceNotes.value || '';
-  invoice.status = invoiceStatus.value || invoice.status;
-  invoice.purchaseType = purchaseType.value || invoice.purchaseType;
-  invoice.gstNo = gstNo.value || invoice.gstNo;
+/* Sync UI fields into invoice object before saving/printing/exporting (keeps for clarity) */
+function syncUIToInvoiceForExport(){
+  syncUIToInvoice();
 }
 
 /* Save invoice to localStorage (snapshot) */
 function saveInvoice(){
-  syncUIToInvoice();
+  syncUIToInvoiceForExport();
   const all = JSON.parse(localStorage.getItem(LS_INVOICES) || '[]');
   const snapshot = JSON.parse(JSON.stringify(invoice));
   snapshot.meta.savedAt = new Date().toISOString();
@@ -715,7 +739,7 @@ function saveInvoice(){
 
 /* Download current invoice JSON */
 function downloadInvoice(){
-  syncUIToInvoice();
+  syncUIToInvoiceForExport();
   const data = JSON.stringify(invoice, null, 2);
   const blob = new Blob([data], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -725,7 +749,8 @@ function downloadInvoice(){
 
 /* Print invoice (simple window) */
 function printInvoice(){
-  syncUIToInvoice();
+  syncUIToInvoiceForExport();
+  updateTotals();
   const win = window.open('', '_blank', 'width=900,height=700');
   const html = buildPrintableInvoiceHtml();
   win.document.write(html);
@@ -736,13 +761,13 @@ function printInvoice(){
 /* Build printable html */
 function buildPrintableInvoiceHtml(){
   const itemsHtml = invoice.items.map(it=>{
-    return `<tr><td style="padding:6px">${escapeHtml(it.name)}<div style="font-size:12px;color:#666">${escapeHtml(it.desc||'')}</div></td><td style="text-align:right;padding:6px">${it.qty}</td><td style="text-align:right;padding:6px">₹${(it.price||0).toLocaleString('en-IN')}</td><td style="text-align:right;padding:6px">₹${lineTotal(it).toLocaleString('en-IN')}</td></tr>`;
+    return `<tr><td style="padding:6px">${escapeHtml(it.name)}<div style="font-size:12px;color:#666">${escapeHtml(it.desc||'')}</div></td><td style="text-align:right;padding:6px">${it.qty}</td><td style="text-align:right;padding:6px">₹${lineTotal(it).toLocaleString('en-IN')}</td></tr>`;
   }).join('');
-  const subtotal = invoice.items.reduce((s,it)=> s + ((Number(it.qty)||0) * (Number(it.price)||0)), 0);
+  const subtotal = invoice.items.reduce((s,it)=> s + ((Number(it.qty)||0) * (lineTotal(it)||0)), 0);
   const globalDiscVal = Number(invoice.globalDisc)||0;
   const taxPct = Number(invoice.globalTax)||0;
   const afterDisc = Math.max(0, invoice.items.reduce((s,it)=> s + lineTotal(it), 0) - globalDiscVal);
-  const globalTaxVal = afterDisc * (taxPct/100);
+  const globalTaxVal = round2(afterDisc * (taxPct/100));
   const grand = round2(afterDisc + globalTaxVal);
   return `<!doctype html><html><head><meta charset="utf-8"><title>Invoice ${escapeHtml(invoice.meta.invoiceNo)}</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -752,7 +777,7 @@ function buildPrintableInvoiceHtml(){
   <div style="display:flex;justify-content:space-between"><div><strong>Invoice:</strong> ${escapeHtml(invoice.meta.invoiceNo)}</div><div><strong>Date:</strong> ${escapeHtml(invoice.meta.date)}</div></div>
   <div style="margin-top:10px"><strong>Bill to:</strong><br>${escapeHtml(invoice.customer.name)}<br>${escapeHtml(invoice.customer.address)}</div>
   <hr>
-  <table><thead><tr><th style="text-align:left">Item</th><th style="text-align:right">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>
+  <table><thead><tr><th style="text-align:left">Item</th><th style="text-align:right">Qty</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>
   <hr>
   <div style="text-align:right">Subtotal: ₹${subtotal.toLocaleString('en-IN')}</div>
   <div style="text-align:right">Discount: ₹${globalDiscVal.toLocaleString('en-IN')}</div>
@@ -822,7 +847,8 @@ function addItemByDefault(name){
 
 /* jsPDF PDF generation for invoice (basic) */
 async function generateInvoicePDF(){
-  syncUIToInvoice();
+  syncUIToInvoiceForExport();
+  updateTotals();
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit:'pt', format:'a4' });
   const pad = 40;
@@ -863,7 +889,8 @@ clearItemsBtn.onclick = ()=> { if(confirm('Clear all items?')){ invoice.items = 
 markPaidBtn.onclick = ()=> { invoice.status='paid'; invoiceStatus.value='paid'; saveInvoice(); updateTotals(); };
 downloadInvoiceJson.onclick = ()=> downloadInvoice();
 printInvoiceBtn.onclick = ()=> printInvoice();
-downloadPdfBtn.onclick = ()=> generateInvoicePDF();
+//downloadPdfBtn.onclick = ()=> generateInvoicePDF();
+downloadPdfBtn.onclick = ()=> printInvoice();
 
 /* purchase type toggle */
 purchaseType.onchange = ()=> {
@@ -979,10 +1006,27 @@ importJsonBtn.onclick = ()=> {
 document.getElementById('exportAllJson').addEventListener('click', ()=> exportAllJsonBtn.onclick());
 document.getElementById('importJsonBtn').addEventListener('click', ()=> importJsonBtn.onclick());
 
-/* Auto-save interval */
+/* Auto-save interval (keep, but it's safe now because sync normalizes values) */
 setInterval(()=> {
   saveDraft();
 }, 3000);
+
+/* Keyboard shortcut Ctrl+S to save invoice snapshot */
+document.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); saveInvoice(); }
+});
+
+/* Immediate handlers so UI changes update totals */
+globalTax.addEventListener('input', ()=> {
+  invoice.globalTax = Number(globalTax.value) || 0;
+  saveDraft();
+  updateTotals();
+});
+globalDisc.addEventListener('input', ()=> {
+  invoice.globalDisc = Number(globalDisc.value) || 0;
+  saveDraft();
+  updateTotals();
+});
 
 /* Initialize */
 (function init(){
@@ -993,10 +1037,6 @@ setInterval(()=> {
   updateTotals();
 })();
 
-/* Keyboard shortcut Ctrl+S to save invoice snapshot */
-document.addEventListener('keydown', (e)=>{
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's'){ e.preventDefault(); saveInvoice(); }
-});
 </script>
 </body>
 </html>
