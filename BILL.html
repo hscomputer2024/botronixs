@@ -759,9 +759,9 @@ function printInvoice(){
 }
 
 /* Build printable html */
-function buildPrintableInvoiceHtml(){
+function buildPrintableInvoiceHtml(copyType){
   const itemsHtml = invoice.items.map(it=>{
-    return `<tr><td style="padding:6px">${escapeHtml(it.name)}<div style="font-size:12px;color:#666">${escapeHtml(it.desc||'')}</div></td><td style="text-align:right;padding:6px">${it.qty}</td><td style="text-align:right;padding:6px">₹${lineTotal(it).toLocaleString('en-IN')}</td></tr>`;
+    return `<tr><td style="padding:6px">${escapeHtml(it.name)}<div style="font-size:12px;color:#666">${escapeHtml(it.desc||'')}</div></td><td style="text-align:right;padding:6px">${it.qty}</td><td style="text-align:right;padding:6px">${it.price}</td><td style="text-align:right;padding:6px">${it.discPct}</td><td style="text-align:right;padding:6px">${it.taxPct}</td><td style="text-align:right;padding:6px">${it.cessPct}</td><td style="text-align:right;padding:6px">₹${lineTotal(it).toLocaleString('en-IN')}</td></tr>`;
   }).join('');
   const subtotal = invoice.items.reduce((s,it)=> s + ((Number(it.qty)||0) * (lineTotal(it)||0)), 0);
   const globalDiscVal = Number(invoice.globalDisc)||0;
@@ -775,15 +775,16 @@ function buildPrintableInvoiceHtml(){
   </head><body>
   <h2>${escapeHtml(invoice.meta.company || 'Company')}</h2>
   <div style="display:flex;justify-content:space-between"><div><strong>Invoice:</strong> ${escapeHtml(invoice.meta.invoiceNo)}</div><div><strong>Date:</strong> ${escapeHtml(invoice.meta.date)}</div></div>
-  <div style="margin-top:10px"><strong>Bill to:</strong><br>${escapeHtml(invoice.customer.name)}<br>${escapeHtml(invoice.customer.address)}</div>
+  <div style="margin-top:10px"><strong>Bill to:</strong><br>Name : ${escapeHtml(invoice.customer.name)}<br>Contact no.: ${escapeHtml(invoice.customer.phone)}</div>Email : ${escapeHtml(invoice.customer.email)}</div><br>Address : ${escapeHtml(invoice.customer.address)}</div>
   <hr>
-  <table><thead><tr><th style="text-align:left">Item</th><th style="text-align:right">Qty</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>
+  <table><thead><tr><th style="text-align:left">Item</th><th style="text-align:right">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Disc %</th><th style="text-align:right">Tax %</th><th style="text-align:right">Cess %</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemsHtml}</tbody></table>
   <hr>
   <div style="text-align:right">Subtotal: ₹${subtotal.toLocaleString('en-IN')}</div>
   <div style="text-align:right">Discount: ₹${globalDiscVal.toLocaleString('en-IN')}</div>
   <div style="text-align:right">Global Tax (${taxPct}%): ₹${round2(globalTaxVal).toLocaleString('en-IN')}</div>
   <div style="text-align:right;font-weight:800">Grand total: ₹${grand.toLocaleString('en-IN')}</div>
   <div style="margin-top:10px">${escapeHtml(invoice.notes || '')}</div>
+  <br>Authorized Signature<br><br>_______________________
   </body></html>`;
 }
 
@@ -916,6 +917,19 @@ defaultProduct.addEventListener('change', (e)=> {
     showQuickImage(d.image);
   }
 });
+
+function generatePdfCopy(copyType){
+    const html = buildPrintableInvoiceHtml(copyType);
+
+    const opt = {
+      margin: 10,
+      filename: copyType + ".pdf",
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(html).save();
+}
 
 /* Products list controls */
 clearAllProductsBtn.onclick = ()=> {
